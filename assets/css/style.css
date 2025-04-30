@@ -3,8 +3,12 @@ body {
     color: #fff;
     font-family: 'Arial', sans-serif;
     text-align: center;
-    padding-left: 15%;
-    padding-right: 15%;
+    padding-top: 120px; /* leave space for fixed header */
+    margin: 0;
+}
+
+.container {
+    padding: 0 15%;
 }
 
 input, button {
@@ -46,7 +50,16 @@ a {
 }
 
 header {
-    margin-bottom: 30px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #000;
+    z-index: 999;
+    padding: 2px 2px;
+    transition: top 0.4s ease;
+    text-align: center;
+    border-bottom: 1px solid #222;
 }
 
 section {
@@ -97,7 +110,7 @@ textarea {
     padding: 0;
     gap: 10px;
     margin-top: 10px;
-}  
+}
 
 .vote-count {
     min-width: 24px;
@@ -105,3 +118,62 @@ textarea {
     display: inline-block;
     color: #fff;
 }
+
+/* Center images and videos with shadow */
+.post img,
+.post video {
+    display: block;
+    margin: 10px auto 0 auto;
+    border-radius: 10px;
+    max-width: 100%;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.08);
+}
+
+#scrollToTopBtn {
+    position: fixed;
+    left: 20px;
+    bottom: 30px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 18px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none; /* Initially hidden */
+    z-index: 1000; /* Ensure it's always on top */
+}
+
+#scrollToTopBtn:hover {
+    background-color: #0056b3;
+}
+
+/* Styling for New and Hot buttons */
+a .btn {
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;  /* Default gray background */
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+/* Active state for New and Hot buttons */
+a .btn.active {
+    background-color: red; /* Active button background color */
+    color: white; /* Active button text color */
+}
+
+/* Inactive state for New and Hot buttons */
+a .btn:not(.active) {
+    background-color: gray; /* Inactive button background color */
+    color: white; /* Inactive button text color */
+}
+
+/* Hover effect for buttons */
+a .btn:hover {
+    background-color: #ddd;
+}
+

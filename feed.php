@@ -11,6 +11,9 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 // Fetch latest posts with user vote
+$sort = $_GET['sort'] ?? 'new';
+$orderBy = ($sort === 'hot') ? 'votes DESC, posts.created_at DESC' : 'posts.created_at DESC';
+
 $sql = "SELECT posts.*, users.username, 
     IFNULL(SUM(post_votes.vote), 0) AS votes,
     (SELECT vote FROM post_votes WHERE post_id = posts.id AND user_id = ?) AS user_vote
@@ -18,7 +21,8 @@ $sql = "SELECT posts.*, users.username,
     LEFT JOIN users ON posts.user_id = users.id
     LEFT JOIN post_votes ON posts.id = post_votes.post_id
     GROUP BY posts.id
-    ORDER BY posts.created_at DESC";
+    ORDER BY $orderBy";
+
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
@@ -40,7 +44,20 @@ $result = $stmt->get_result();
         <a href="post.php">Create Post</a> | <a href="logout.php">Logout</a>
     </header>
 
+    <!-- Scroll to Top Button -->
+    <button id="scrollToTopBtn" title="Go to top">↑</button>
+
+    <div class="container">
     <section>
+    <div style="margin-top: 40px; margin-bottom: 20px;">
+    <a href="?sort=new">
+        <button class="btn <?php echo ($sort === 'new') ? 'active' : ''; ?>">New</button>
+    </a>
+    <a href="?sort=hot">
+        <button class="btn <?php echo ($sort === 'hot') ? 'active' : ''; ?>">Hot</button>
+    </a>
+</div>
+
     <?php while ($row = $result->fetch_assoc()): ?>
         <div class="post">
             <h3>@<?php echo htmlspecialchars($row['username']); ?></h3>
@@ -53,10 +70,11 @@ $result = $stmt->get_result();
             ?>
             <img src="<?php echo htmlspecialchars($row['image_path']); ?>" alt="Post image" style="max-width: 100%; margin-top: 10px; border-radius: 10px;">
             <?php elseif (in_array($ext, ['mp4', 'webm', 'ogg'])): ?>
-                <video controls style="max-width: 100%; margin-top: 10px; border-radius: 10px;">
+                <video class="click-toggle-mute" autoplay loop muted style="max-width: 100%; margin-top: 10px; border-radius: 10px;">
                 <source src="<?php echo htmlspecialchars($row['image_path']); ?>" type="video/<?php echo $ext; ?>">
                 Your browser does not support the video tag.
-            </video>
+                </video>
+
         <?php endif; ?>
     <?php endif; ?>
             <!--<hr style="opacity: 25%;">-->
@@ -147,6 +165,7 @@ $result = $stmt->get_result();
 
     <?php endwhile; ?>
     </section>
+    </div>
 
     <script>
     function vote(postId, voteValue) {
@@ -216,6 +235,81 @@ $result = $stmt->get_result();
     }
     </script>
 
+<script>
+let lastScroll = 0;
+const header = document.querySelector('header');
+
+window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+
+    if (currentScroll > lastScroll && currentScroll > 100) {
+        // Scrolling down
+        header.style.top = "-160px";
+    } else {
+        // Scrolling up
+        header.style.top = "0";
+    }
+
+    lastScroll = currentScroll;
+});
+</script>
+
+<script>
+// Toggle mute/unmute on video click
+document.querySelectorAll('video.click-toggle-mute').forEach(video => {
+    video.addEventListener('click', () => {
+        video.muted = !video.muted;
+    });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const videos = document.querySelectorAll('video.click-toggle-mute');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const video = entry.target;
+            if (entry.isIntersecting) {
+                // Play the video (don't unmute)
+                video.play().catch(e => {}); 
+            } else {
+                // Pause and mute the video when out of view
+                video.pause();
+                video.muted = true;
+            }
+        });
+    }, {
+        threshold: 0.25 // At least 25% of the video must be visible
+    });
+
+    videos.forEach(video => {
+        observer.observe(video);
+    });
+});
+</script>
+
+<script>
+// Scroll to Top button functionality
+const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+
+// Show the button when scrolling down
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 300) {  // Show the button when scrolled more than 300px
+        scrollToTopBtn.style.display = 'block';
+    } else {
+        scrollToTopBtn.style.display = 'none';
+    }
+});
+
+// Scroll to top functionality
+scrollToTopBtn.addEventListener('click', () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+});
+</script>
 
 </body>
 </html>
