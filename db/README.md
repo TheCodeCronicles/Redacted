@@ -12,7 +12,7 @@ Therafter load the database dump that you'll find in /db/redacted_db.sql by runn
 - mysql -uroot redacted_db < "Path to your redacted_db.sql dump"
 
 
-When you want to commit (Dis nou jy Anthony):
+When you want to commit:
 - \xampp\mysql\bin
 - mysqldump -u root -p redacted_db > "C:\xampp\htdocs\Redacted\db\redacted_db.sql"
 - Password: Druk ENTER
