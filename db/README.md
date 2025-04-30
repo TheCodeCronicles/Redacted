@@ -1,3 +1,5 @@
+Commit Steps:
+
 Navigate to: 
 - \xampp\mysql\bin
 
