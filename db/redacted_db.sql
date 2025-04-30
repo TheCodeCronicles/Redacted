@@ -180,7 +180,7 @@ CREATE TABLE `post_votes` (
   KEY `post_id` (`post_id`),
   CONSTRAINT `post_votes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `post_votes_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,7 +189,7 @@ CREATE TABLE `post_votes` (
 
 LOCK TABLES `post_votes` WRITE;
 /*!40000 ALTER TABLE `post_votes` DISABLE KEYS */;
-INSERT INTO `post_votes` VALUES (1,1,1,1,'2025-04-29 09:14:51'),(8,1,2,1,'2025-04-29 17:02:52'),(13,2,2,1,'2025-04-30 10:34:43'),(31,2,3,1,'2025-04-30 11:26:26'),(32,1,3,1,'2025-04-30 11:26:43'),(43,2,1,1,'2025-04-30 12:46:10'),(50,2,4,1,'2025-04-30 13:07:18'),(51,3,4,1,'2025-04-30 14:38:28'),(52,3,3,1,'2025-04-30 14:38:59');
+INSERT INTO `post_votes` VALUES (1,1,1,1,'2025-04-29 09:14:51'),(8,1,2,1,'2025-04-29 17:02:52'),(13,2,2,1,'2025-04-30 10:34:43'),(31,2,3,1,'2025-04-30 11:26:26'),(32,1,3,1,'2025-04-30 11:26:43'),(43,2,1,1,'2025-04-30 12:46:10'),(50,2,4,1,'2025-04-30 13:07:18'),(51,3,4,1,'2025-04-30 14:38:28'),(52,3,3,1,'2025-04-30 14:38:59'),(53,3,5,1,'2025-04-30 18:37:02'),(56,3,6,1,'2025-04-30 18:52:45');
 /*!40000 ALTER TABLE `post_votes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -209,7 +209,7 @@ CREATE TABLE `posts` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -218,7 +218,7 @@ CREATE TABLE `posts` (
 
 LOCK TABLES `posts` WRITE;
 /*!40000 ALTER TABLE `posts` DISABLE KEYS */;
-INSERT INTO `posts` VALUES (1,1,'YOOOOOO','uploads/68109888504f3_Pigeon Mascot.png','2025-04-29 09:14:48'),(2,1,'We Are [Redacted]','uploads/6810e8bf126cf_Vogels met eleganse in tuxedo.png','2025-04-29 14:57:03'),(3,2,'When life gives you lemons, make lemonade!','uploads/68120034cc63d_181803c7fd180b360f97f1ab5f3d8963.jpg','2025-04-30 10:49:24'),(4,2,'Fake confidence and you\'ll find that it\'s real...',NULL,'2025-04-30 13:07:15'),(5,3,'Werk hierdie?',NULL,'2025-04-30 14:39:47');
+INSERT INTO `posts` VALUES (1,1,'YOOOOOO','uploads/68109888504f3_Pigeon Mascot.png','2025-04-29 09:14:48'),(2,1,'We Are [Redacted]','uploads/6810e8bf126cf_Vogels met eleganse in tuxedo.png','2025-04-29 14:57:03'),(3,2,'When life gives you lemons, make lemonade!','uploads/68120034cc63d_181803c7fd180b360f97f1ab5f3d8963.jpg','2025-04-30 10:49:24'),(4,2,'Fake confidence and you\'ll find that it\'s real...',NULL,'2025-04-30 13:07:15'),(5,3,'Werk hierdie?',NULL,'2025-04-30 14:39:47'),(6,3,'Video Test','uploads/68127176f2bf1_Gif.mp4','2025-04-30 18:52:38');
 /*!40000 ALTER TABLE `posts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -287,4 +287,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-30 16:49:38
+-- Dump completed on 2025-04-30 21:00:17
