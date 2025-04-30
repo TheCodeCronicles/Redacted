@@ -10,26 +10,36 @@ if (!isset($_SESSION['user_id'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $content = trim($_POST['content']);
     $user_id = $_SESSION['user_id'];
-    $image_path = null;
+    $media_path = null;
 
     // Handle file upload
-    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+    if (isset($_FILES['media']) && $_FILES['media']['error'] == 0) {
         $target_dir = "uploads/";
         if (!is_dir($target_dir)) {
-            mkdir($target_dir, 0755, true); // Make uploads folder if missing
+            mkdir($target_dir, 0755, true);
         }
 
-        $file_name = uniqid() . "_" . basename($_FILES["image"]["name"]);
-        $target_file = $target_dir . $file_name;
+        $file_tmp = $_FILES["media"]["tmp_name"];
+        $file_type = mime_content_type($file_tmp);
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/webm', 'video/ogg'];
 
-        if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-            $image_path = $target_file;
+        if (in_array($file_type, $allowed_types)) {
+            $file_name = uniqid() . "_" . basename($_FILES["media"]["name"]);
+            $target_file = $target_dir . $file_name;
+
+            if (move_uploaded_file($file_tmp, $target_file)) {
+                $media_path = $target_file;
+            }
+        } else {
+            echo "Unsupported file type.";
+            exit();
         }
     }
 
-    if (!empty($content) || $image_path !== null) {
+    if (!empty($content) || $media_path !== null) {
+        // Remove media_type from the query
         $stmt = $conn->prepare("INSERT INTO posts (user_id, content, image_path, created_at) VALUES (?, ?, ?, NOW())");
-        $stmt->bind_param("iss", $user_id, $content, $image_path);
+        $stmt->bind_param("iss", $user_id, $content, $media_path);
 
         if ($stmt->execute()) {
             header("Location: feed.php");
@@ -55,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <form method="POST" action="" enctype="multipart/form-data">
             <h1>Create a Post</h1>
             <textarea name="content" rows="5" placeholder="What's happening?" required></textarea><br><br>
-            <input type="file" name="image" accept="image/*"><br><br>
+            <input type="file" name="media" accept="image/*,video/*">
             <button class="btn" type="submit">Post</button>
         </form>
         <p><a href="feed.php">Back to Feed</a></p>
