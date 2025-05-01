@@ -36,7 +36,7 @@ $result = $stmt->get_result();
 </head>
 <body class="loopbody">
 
-<a href="feed.php"><button class="back-btn">← Back to Feed</button></a>
+<?php include 'navbar.php'; ?>
 
 <?php while ($row = $result->fetch_assoc()): ?>
     <div class="video-post">
@@ -330,6 +330,14 @@ function voteComment(commentId, vote) {
         console.error('Error:', error);
     });
 }
+
+// Toggle mute/unmute on video click
+document.querySelectorAll('video.reel-video').forEach(video => {
+    video.addEventListener('click', () => {
+        video.muted = !video.muted;
+    });
+});
+
 </script>
 
 

@@ -488,3 +488,54 @@ a .btn:hover {
     border-radius: 5px;
     cursor: pointer;
 }
+
+/* === Navbar Styling === */
+nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    background-color: #111; /* Dark background for the navbar */
+    padding: 10px 0;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 999;
+}
+
+/* White circle placeholder logo */
+.navbar-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: white; /* White circle */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); /* Slight shadow */
+    transition: transform 0.3s ease; /* Smooth transform for hover */
+}
+
+/* Hover effect for the logo */
+.navbar-logo:hover {
+    transform: scale(1.1); /* Slightly enlarge logo on hover */
+}
+
+/* Navbar links */
+nav a {
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+/* Active state for links */
+nav a.active {
+    background-color: #1138cc;
+    color: white;
+}
+
+/* Hover effect for links */
+nav a:hover {
+    background-color: #444;
+}
+
