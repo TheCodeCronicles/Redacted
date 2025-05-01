@@ -25,7 +25,9 @@ input {
 }
 
 .userforms {
-    padding: 20%;
+    padding-top: 0;
+    padding-left: 20%;
+    padding-right: 20%;
 }
 
 .btn {
@@ -176,4 +178,32 @@ a .btn:not(.active) {
 a .btn:hover {
     background-color: #ddd;
 }
+
+.input-container {
+    width: 85%; /* Match input width */
+    margin: 0px auto; /* Centered and spaced like other inputs */
+    position: relative;
+}
+
+.input-container input {
+    width: 100%;
+    padding-right: 2.5em;
+    box-sizing: border-box;
+    background-color: #1a1a1a;
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+}
+
+
+.input-feedback {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9em;
+    pointer-events: none;
+}
+
 

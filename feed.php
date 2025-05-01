@@ -66,7 +66,7 @@ $result = $stmt->get_result();
             <?php if (!empty($row['image_path'])): ?>
             <?php
             $ext = strtolower(pathinfo($row['image_path'], PATHINFO_EXTENSION));
-            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])):
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', "webp"])):
             ?>
             <img src="<?php echo htmlspecialchars($row['image_path']); ?>" alt="Post image" style="max-width: 100%; margin-top: 10px; border-radius: 10px;">
             <?php elseif (in_array($ext, ['mp4', 'webm', 'ogg'])): ?>
