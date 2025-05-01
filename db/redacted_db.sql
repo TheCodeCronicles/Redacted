@@ -33,7 +33,7 @@ CREATE TABLE `comment_votes` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `comment_votes_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE,
   CONSTRAINT `comment_votes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -42,7 +42,7 @@ CREATE TABLE `comment_votes` (
 
 LOCK TABLES `comment_votes` WRITE;
 /*!40000 ALTER TABLE `comment_votes` DISABLE KEYS */;
-INSERT INTO `comment_votes` VALUES (1,1,1,1,'2025-04-29 17:02:53'),(2,1,2,1,'2025-04-30 10:34:32'),(3,2,2,1,'2025-04-30 12:38:29'),(4,3,3,1,'2025-04-30 14:38:25'),(5,4,3,-1,'2025-04-30 14:38:41');
+INSERT INTO `comment_votes` VALUES (1,1,1,1,'2025-04-29 17:02:53'),(2,1,2,1,'2025-04-30 10:34:32'),(3,2,2,1,'2025-04-30 12:38:29'),(4,3,3,1,'2025-04-30 14:38:25'),(5,4,3,-1,'2025-04-30 14:38:41'),(6,4,5,1,'2025-05-01 09:10:30');
 /*!40000 ALTER TABLE `comment_votes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -64,7 +64,7 @@ CREATE TABLE `comments` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
   CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -73,7 +73,7 @@ CREATE TABLE `comments` (
 
 LOCK TABLES `comments` WRITE;
 /*!40000 ALTER TABLE `comments` DISABLE KEYS */;
-INSERT INTO `comments` VALUES (1,2,1,'Yooo this is fireee!!!','2025-04-29 14:57:19'),(2,2,2,'Pigeon?? Legendary!!!','2025-04-30 12:38:25'),(3,4,2,'🔥🔥🔥🔥','2025-04-30 13:07:49'),(4,4,3,'kwaai','2025-04-30 14:38:37');
+INSERT INTO `comments` VALUES (1,2,1,'Yooo this is fireee!!!','2025-04-29 14:57:19'),(2,2,2,'Pigeon?? Legendary!!!','2025-04-30 12:38:25'),(3,4,2,'🔥🔥🔥🔥','2025-04-30 13:07:49'),(4,4,3,'kwaai','2025-04-30 14:38:37'),(5,7,5,'🔥🔥🔥🔥','2025-05-01 08:58:26');
 /*!40000 ALTER TABLE `comments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -180,7 +180,7 @@ CREATE TABLE `post_votes` (
   KEY `post_id` (`post_id`),
   CONSTRAINT `post_votes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `post_votes_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,7 +189,7 @@ CREATE TABLE `post_votes` (
 
 LOCK TABLES `post_votes` WRITE;
 /*!40000 ALTER TABLE `post_votes` DISABLE KEYS */;
-INSERT INTO `post_votes` VALUES (1,1,1,1,'2025-04-29 09:14:51'),(8,1,2,1,'2025-04-29 17:02:52'),(13,2,2,1,'2025-04-30 10:34:43'),(31,2,3,1,'2025-04-30 11:26:26'),(32,1,3,1,'2025-04-30 11:26:43'),(43,2,1,1,'2025-04-30 12:46:10'),(50,2,4,1,'2025-04-30 13:07:18'),(51,3,4,1,'2025-04-30 14:38:28'),(52,3,3,1,'2025-04-30 14:38:59'),(53,3,5,1,'2025-04-30 18:37:02'),(56,3,6,1,'2025-04-30 18:52:45');
+INSERT INTO `post_votes` VALUES (1,1,1,1,'2025-04-29 09:14:51'),(8,1,2,1,'2025-04-29 17:02:52'),(13,2,2,1,'2025-04-30 10:34:43'),(31,2,3,1,'2025-04-30 11:26:26'),(32,1,3,1,'2025-04-30 11:26:43'),(43,2,1,1,'2025-04-30 12:46:10'),(50,2,4,1,'2025-04-30 13:07:18'),(51,3,4,1,'2025-04-30 14:38:28'),(52,3,3,1,'2025-04-30 14:38:59'),(53,3,5,1,'2025-04-30 18:37:02'),(56,3,6,1,'2025-04-30 18:52:45'),(57,2,7,1,'2025-05-01 06:50:56'),(58,5,8,1,'2025-05-01 08:58:11'),(59,5,3,1,'2025-05-01 09:00:52'),(60,5,7,1,'2025-05-01 09:01:15'),(61,5,6,1,'2025-05-01 09:01:20'),(62,5,5,1,'2025-05-01 09:10:22');
 /*!40000 ALTER TABLE `post_votes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -209,7 +209,7 @@ CREATE TABLE `posts` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -218,7 +218,7 @@ CREATE TABLE `posts` (
 
 LOCK TABLES `posts` WRITE;
 /*!40000 ALTER TABLE `posts` DISABLE KEYS */;
-INSERT INTO `posts` VALUES (1,1,'YOOOOOO','uploads/68109888504f3_Pigeon Mascot.png','2025-04-29 09:14:48'),(2,1,'We Are [Redacted]','uploads/6810e8bf126cf_Vogels met eleganse in tuxedo.png','2025-04-29 14:57:03'),(3,2,'When life gives you lemons, make lemonade!','uploads/68120034cc63d_181803c7fd180b360f97f1ab5f3d8963.jpg','2025-04-30 10:49:24'),(4,2,'Fake confidence and you\'ll find that it\'s real...',NULL,'2025-04-30 13:07:15'),(5,3,'Werk hierdie?',NULL,'2025-04-30 14:39:47'),(6,3,'Video Test','uploads/68127176f2bf1_Gif.mp4','2025-04-30 18:52:38'),(7,3,'Can\'t Park there mate','uploads/681274f37c5de_Cant park there.mp4','2025-04-30 19:07:31');
+INSERT INTO `posts` VALUES (1,1,'YOOOOOO','uploads/68109888504f3_Pigeon Mascot.png','2025-04-29 09:14:48'),(2,1,'We Are [Redacted]','uploads/6810e8bf126cf_Vogels met eleganse in tuxedo.png','2025-04-29 14:57:03'),(3,2,'When life gives you lemons, make lemonade!','uploads/68120034cc63d_181803c7fd180b360f97f1ab5f3d8963.jpg','2025-04-30 10:49:24'),(4,2,'Fake confidence and you\'ll find that it\'s real...',NULL,'2025-04-30 13:07:15'),(5,3,'Werk hierdie?',NULL,'2025-04-30 14:39:47'),(6,3,'Video Test','uploads/68127176f2bf1_Gif.mp4','2025-04-30 18:52:38'),(7,3,'Can\'t Park there mate','uploads/681274f37c5de_Cant park there.mp4','2025-04-30 19:07:31'),(8,5,'PACMAN','uploads/6813379ccf941_aisoW6.webp','2025-05-01 08:58:04');
 /*!40000 ALTER TABLE `posts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -265,7 +265,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -274,7 +274,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'WeAre[Redacted]','weareredacted@gmail.com','$2y$10$zpsnHepbFKA3gK/Hi/V8sei6N8Rqzp/9Ab5W/w6DozA/ZoyX2Vani','default.png','','2025-04-29 09:14:33'),(2,'schroeder_fijanko','fijankosc@gmail.com','$2y$10$8Yh1SnupCE1Sa2MTDB9BjOutP.qrbe.1bcF8WAKXyAprWhOtxcY0S','default.png','','2025-04-30 10:34:28'),(3,'Anthony van der Watt','antwatt2002@gmail.com','$2y$10$qxCcfhaeP.qpUwfInmZKt.Ph6za0js1ga7Me.mRjPBZlqJ13hRsQS','default.png','','2025-04-30 14:38:11');
+INSERT INTO `users` VALUES (1,'WeAre[Redacted]','weareredacted@gmail.com','$2y$10$zpsnHepbFKA3gK/Hi/V8sei6N8Rqzp/9Ab5W/w6DozA/ZoyX2Vani','default.png','','2025-04-29 09:14:33'),(2,'schroeder_fijanko','fijankosc@gmail.com','$2y$10$8Yh1SnupCE1Sa2MTDB9BjOutP.qrbe.1bcF8WAKXyAprWhOtxcY0S','default.png','','2025-04-30 10:34:28'),(3,'Anthony_van_der_Watt','antwatt2002@gmail.com','$2y$10$qxCcfhaeP.qpUwfInmZKt.Ph6za0js1ga7Me.mRjPBZlqJ13hRsQS','default.png','','2025-04-30 14:38:11'),(4,'UnknownChaos','fijanko321@gmail.com','$2y$10$XF9y.DRd56R6OUxH1hY4Ue8AZKF5CDypXmbVe1stIKZdN6LU6bK0S','default.png','','2025-05-01 08:40:18'),(5,'The_Unforgiving_Camel','test@gmail.com','$2y$10$6iFMKbtW92SDhqVTH4zit.MPTbXAZdDjV6mrMwB8BVHOgwY6bAgaq','default.png','','2025-05-01 08:44:12'),(6,'LabTech','LabTech@gmail.com','$2y$10$SpM0u0CdpWvEpbkm.pcdtOT1c50gKswSKsZ2Sv2o..mSWll4Q1duK','default.png','','2025-05-01 08:53:04');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -287,4 +287,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-30 21:08:12
+-- Dump completed on 2025-05-01 13:57:55
