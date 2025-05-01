@@ -50,13 +50,13 @@ $result = $stmt->get_result();
     <div class="container">
     <section>
     <div style="margin-top: 40px; margin-bottom: 20px;">
-    <a href="?sort=new">
-        <button class="btn <?php echo ($sort === 'new') ? 'active' : ''; ?>">New</button>
-    </a>
-    <a href="?sort=hot">
-        <button class="btn <?php echo ($sort === 'hot') ? 'active' : ''; ?>">Hot</button>
-    </a>
-</div>
+        <a href="?sort=new">
+            <button class="btn <?php echo ($sort === 'new') ? 'active' : ''; ?>">New</button>
+        </a>
+        <a href="?sort=hot">
+            <button class="btn <?php echo ($sort === 'hot') ? 'active' : ''; ?>">Hot</button>
+        </a>
+    </div>
 
     <?php while ($row = $result->fetch_assoc()): ?>
         <div class="post">
@@ -66,18 +66,20 @@ $result = $stmt->get_result();
             <?php if (!empty($row['image_path'])): ?>
             <?php
             $ext = strtolower(pathinfo($row['image_path'], PATHINFO_EXTENSION));
-            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', "webp"])):
-            ?>
-            <img src="<?php echo htmlspecialchars($row['image_path']); ?>" alt="Post image" style="max-width: 100%; margin-top: 10px; border-radius: 10px;">
-            <?php elseif (in_array($ext, ['mp4', 'webm', 'ogg'])): ?>
-                <video class="click-toggle-mute" autoplay loop muted style="max-width: 100%; margin-top: 10px; border-radius: 10px;">
-                <source src="<?php echo htmlspecialchars($row['image_path']); ?>" type="video/<?php echo $ext; ?>">
-                Your browser does not support the video tag.
-                </video>
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', "webp"])):?>
 
-        <?php endif; ?>
-    <?php endif; ?>
-            <!--<hr style="opacity: 25%;">-->
+                <img src="<?php echo htmlspecialchars($row['image_path']); ?>" alt="Post image" style="max-width: 100%; margin-top: 10px; border-radius: 10px;">
+
+                <?php elseif (in_array($ext, ['mp4', 'webm', 'ogg'])): ?>
+
+                    <video class="click-toggle-mute" autoplay loop muted style="max-width: 100%; margin-top: 10px; border-radius: 10px;">
+                        <source src="<?php echo htmlspecialchars($row['image_path']); ?>" type="video/<?php echo $ext; ?>">
+                        Your browser does not support the video tag.
+                    </video>
+
+                <?php endif; ?>
+            <?php endif; ?>
+            
             <div class="vote-container">
 
                 <?php
@@ -91,14 +93,13 @@ $result = $stmt->get_result();
                     <img src="<?php echo $up_icon; ?>" alt="Upvote" width="24" height="24">
                 </button>
 
+                <span class="vote-count" id="votes-<?php echo $row['id']; ?>" width="24" height="24"><?php echo $row['votes']; ?></span>
                 
                 <button class="vote" onclick="vote(<?php echo $row['id']; ?>, -1)">
                     <img src="<?php echo $down_icon; ?>" alt="Downvote" width="24" height="24">
                 </button>
-                <span class="vote-count" id="votes-<?php echo $row['id']; ?>" width="24" height="24"><?php echo $row['votes']; ?></span>
-
             </div>
-            <!--<hr style="opacity: 25%;"> -->
+            
             <?php
             // Fetch comments for the post
             $post_id = $row['id'];
@@ -134,7 +135,7 @@ $result = $stmt->get_result();
                     ?>
 
                     <div class="comment">
-                        <strong>@<?php echo htmlspecialchars($comment['username']); ?>:</strong> 
+                        <strong>@<?php echo htmlspecialchars($comment['username']); ?></strong> 
                         <?php echo nl2br(htmlspecialchars($comment['content'])); ?>
 
                         <div class="vote-container">
@@ -142,10 +143,12 @@ $result = $stmt->get_result();
                                 <img src="<?php echo $up_icon; ?>" alt="Upvote" width="24" height="24">
                             </button>
 
+                            <span class="vote-count"><?php echo $vote_count; ?></span>
+
                             <button class="vote" onclick="voteComment(<?php echo $comment['id']; ?>, -1)">
                                 <img src="<?php echo $down_icon; ?>" alt="Downvote" width="24" height="24">
                             </button>
-                            <span class="vote-count"><?php echo $vote_count; ?></span>
+                            
                         </div>
 
                         <small>(<?php echo $comment['created_at']; ?>)</small>
@@ -167,75 +170,74 @@ $result = $stmt->get_result();
     </section>
     </div>
 
-    <script>
-    function vote(postId, voteValue) {
-        const formData = new FormData();
-        formData.append('post_id', postId);
-        formData.append('vote', voteValue);
-    
-        fetch('vote.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (!response.ok) {
-                alert("Vote failed!");
-                return;
-            }
-            // Reload votes
-            location.reload();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    }
-
-    function submitComment(event, postId) {
-        event.preventDefault();
-        const form = event.target;
-        const formData = new FormData(form);
-        formData.append('post_id', postId);
-
-        fetch('comment.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (!response.ok) {
-                alert("Failed to comment!");
-                return;
-            }
-            // Reload page to show new comment
-            location.reload();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    }
-
-    function voteComment(commentId, vote) {
-        const formData = new FormData();
-        formData.append('comment_id', commentId);
-        formData.append('vote', vote);
-        
-        fetch('comment_vote.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (!response.ok) {
-                alert("Failed to vote.");
-                return;
-            }
-            location.reload(); // reload page to update vote counts
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    }
-    </script>
-
 <script>
+function vote(postId, voteValue) {
+    const formData = new FormData();
+    formData.append('post_id', postId);
+    formData.append('vote', voteValue);
+
+    fetch('vote.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            alert("Vote failed!");
+            return;
+        }
+        // Reload votes
+        location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function submitComment(event, postId) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    formData.append('post_id', postId);
+
+    fetch('comment.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            alert("Failed to comment!");
+            return;
+        }
+        // Reload page to show new comment
+        location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function voteComment(commentId, vote) {
+    const formData = new FormData();
+    formData.append('comment_id', commentId);
+    formData.append('vote', vote);
+    
+        fetch('comment_vote.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            alert("Failed to vote.");
+            return;
+        }
+        location.reload(); // reload page to update vote counts
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+
 let lastScroll = 0;
 const header = document.querySelector('header');
 
@@ -252,18 +254,14 @@ window.addEventListener('scroll', () => {
 
     lastScroll = currentScroll;
 });
-</script>
 
-<script>
 // Toggle mute/unmute on video click
 document.querySelectorAll('video.click-toggle-mute').forEach(video => {
     video.addEventListener('click', () => {
         video.muted = !video.muted;
     });
 });
-</script>
 
-<script>
 document.addEventListener("DOMContentLoaded", function () {
     const videos = document.querySelectorAll('video.click-toggle-mute');
 
@@ -287,9 +285,7 @@ document.addEventListener("DOMContentLoaded", function () {
         observer.observe(video);
     });
 });
-</script>
 
-<script>
 // Scroll to Top button functionality
 const scrollToTopBtn = document.getElementById('scrollToTopBtn');
 

@@ -28,12 +28,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 }
 
 .navbar a.active {
-    background: #ff4444;
+    background: #1138cc;
     color: white;
 }
 </style>
 
 <div class="navbar">
     <a href="feed.php" class="<?= $currentPage == 'feed.php' ? 'active' : '' ?>">Feed</a>
-    <a href="loop.php" class="<?= $currentPage == 'loop.php' ? 'active' : '' ?>">Loop</a>
+    <a href="loop.php" class="<?= $currentPage == 'loop.php' ? 'active' : '' ?>">[REDACTS]</a>
 </div>

@@ -7,6 +7,25 @@ body {
     margin: 0;
 }
 
+/* Webkit-based browsers (Chrome, Edge, Safari) */
+body::-webkit-scrollbar {
+  width: 6px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
 .container {
     padding: 0 15%;
 }
@@ -31,7 +50,7 @@ input {
 }
 
 .btn {
-    background-color: #e60023;
+    background-color: #1138cc;
     color: #fff;
     font-weight: bold;
     cursor: pointer;
@@ -39,7 +58,7 @@ input {
 }
 
 .submit-btn {
-    background-color: #e60023;
+    background-color: #1138cc;
     color: #fff;
     font-weight: bold;
     cursor: pointer;
@@ -104,6 +123,17 @@ textarea {
     margin-top: 10px;
 }
 
+.vote-container-loop {
+  position: absolute;
+  right: 5%;
+  bottom: 20%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 2;
+}
+
 .vote {
     background: none;
     border: none;
@@ -112,6 +142,11 @@ textarea {
     padding: 0;
     gap: 10px;
     margin-top: 10px;
+    transition: transform 0.1s;
+}
+
+.vote:hover {
+    transform: scale(1.1);
 }
 
 .vote-count {
@@ -164,7 +199,7 @@ a .btn {
 
 /* Active state for New and Hot buttons */
 a .btn.active {
-    background-color: red; /* Active button background color */
+    background-color: #1138cc; /* Active button background color */
     color: white; /* Active button text color */
 }
 
@@ -207,3 +242,249 @@ a .btn:hover {
 }
 
 
+.loopbody {
+    margin: 0;
+    padding: 0;
+    background: black;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+}
+
+.video-post {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    scroll-snap-align: start;
+    position: relative;
+    background: black;
+}
+
+.reel-frame {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 9 / 16;
+    background-color: black;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.reel-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.overlay {
+  position: absolute;
+  bottom: 5%;
+  left: 5%;
+  color: white;
+  z-index: 2;
+  text-align: left;
+}
+
+.back-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background-color: #1138cc;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 10px;
+    z-index: 5;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.vote-count {
+    font-size: 1.2em;
+    margin-top: 5px;
+}
+
+.comment-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 66.6%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    color: white;
+    padding: 10px;
+    box-sizing: border-box;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    backdrop-filter: blur(8px);
+    z-index: 3;
+
+    /* Animation styles */
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+.comment-panel.show {
+    transform: translateY(0%);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.comment-panel .close-btn {
+    background-color: #1138cc;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.comment-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Webkit-based browsers (Chrome, Edge, Safari) */
+.comment-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comment-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.comment-list::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.comment-list::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.comment-redacts {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.comment-content {
+    display: flex;
+    flex-direction: column;
+    word-wrap: break-word;
+    word-break: break-word;
+    max-width: calc(100% - 60px); /* Adjust based on how wide the vote area is */
+}
+
+.comment-content strong {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    display: block;
+}
+
+.comment-content small {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.comment-username {
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.comment-text {
+    font-size: 14px;
+    color: #e0e0e0;
+    text-align: left;
+    margin-bottom: 4px;
+}
+
+.comment-date {
+    font-size: 12px;
+    text-align: left;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+
+.comment-redacts br {
+    line-height: 1.4;
+}
+
+.vote-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0px;
+    flex-shrink: 0;
+}
+
+.comment-input {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.comment-input input {
+    flex: 1;
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+    background-color: #222;
+    color: white;
+}
+
+.comment-input button {
+    padding: 8px 12px;
+    border: none;
+    background-color: #0d6efd;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.no-comments {
+    text-align: center;
+    color: #aaa;
+    margin-top: 20px;
+}
+
+.comment-form {
+    margin-top: auto; /* Push the form to the bottom */
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #333;
+    height: 40px; /* Fixed height for the comment box */
+    resize: none;
+}
+
+.comment-form button {
+    background-color: #1138cc;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}

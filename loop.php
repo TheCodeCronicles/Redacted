@@ -12,7 +12,8 @@ $user_id = $_SESSION['user_id'];
 
 // Fetch only video posts
 $sql = "SELECT posts.*, users.username, 
-    IFNULL(SUM(post_votes.vote), 0) AS votes
+    IFNULL(SUM(post_votes.vote), 0) AS votes,
+    (SELECT vote FROM post_votes WHERE post_id = posts.id AND user_id = ?) AS user_vote
     FROM posts
     LEFT JOIN users ON posts.user_id = users.id
     LEFT JOIN post_votes ON posts.id = post_votes.post_id
@@ -20,208 +21,172 @@ $sql = "SELECT posts.*, users.username,
     GROUP BY posts.id
     ORDER BY posts.created_at DESC";
 
-$result = $conn->query($sql);
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Loop - [REDACTED]</title>
+    <title>Redacts - [REDACTED]</title>
     <link rel="stylesheet" href="assets/css/style.css">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: black;
-            overflow-y: scroll;
-            scroll-snap-type: y mandatory;
-        }
-
-        .video-post {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            scroll-snap-align: start;
-            position: relative;
-            overflow: hidden;
-        }
-
-        video {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* show entire video */
-            background: black; /* black bars */
-            z-index: 0;
-        }
-
-        .overlay {
-            z-index: 2;
-            color: white;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .back-btn {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            background-color: #ff4444;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 10px;
-            z-index: 5;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .vote-count {
-            font-size: 1.2em;
-            margin-top: 5px;
-        }
-
-        /* Styles for the comment section */
-        .comment-panel {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            max-width: 600px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px;
-            z-index: 100;
-            height: 60vh;
-            overflow: hidden; /* Hide scrollbars for the panel */
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .comment-panel .close-btn {
-            background-color: #ff4444;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            position: absolute;
-            top: 15px;
-            right: 15px;
-        }
-
-        .comment-list {
-            list-style-type: none;
-            padding: 0;
-            flex-grow: 1;
-            overflow-y: auto; /* Make only the comment list scrollable */
-            margin-bottom: 10px;
-        }
-
-        .no-comments {
-            text-align: center;
-            color: #aaa;
-            margin-top: 20px;
-        }
-
-        .comment-form {
-            margin-top: auto; /* Push the form to the bottom */
-        }
-
-        .comment-form textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #333;
-            height: 40px; /* Fixed height for the comment box */
-            resize: none;
-        }
-
-        .comment-form button {
-            background-color: #ff4444;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    </style>
 </head>
-<body>
+<body class="loopbody">
 
 <a href="feed.php"><button class="back-btn">← Back to Feed</button></a>
 
 <?php while ($row = $result->fetch_assoc()): ?>
     <div class="video-post">
-        <video class="reel-video" autoplay loop playsinline>
-            <source src="<?php echo htmlspecialchars($row['image_path']); ?>" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-        <div class="overlay">
-            <h3>@<?php echo htmlspecialchars($row['username']); ?></h3>
-            <p><?php echo nl2br(htmlspecialchars($row['content'])); ?></p>
-            <div class="vote-count">❤️ <?php echo $row['votes']; ?> votes</div>
-            <small><?php echo $row['created_at']; ?></small>
-            <button class="comment-btn" onclick="toggleCommentPanel(<?php echo $row['id']; ?>)">💬 Comments</button>
+        <div class="reel-frame">
+            <video class="reel-video" autoplay loop playsinline>
+                <source src="<?php echo htmlspecialchars($row['image_path']); ?>" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+
+            <div class="overlay">
+                <h3>@<?php echo htmlspecialchars($row['username']); ?></h3>
+                <p><?php echo nl2br(htmlspecialchars($row['content'])); ?></p>
+
+                <small><?php echo $row['created_at']; ?></small>
+            </div>
+
+            <div class="vote-container-loop">
+
+                <?php
+                $user_vote = $row['user_vote'];
+                $up_icon = $user_vote == 1 ? 'assets/images/upVote-arrow.png' : 'assets/images/up-arrow.png';
+                $down_icon = $user_vote == -1 ? 'assets/images/downVote-arrow.png' : 'assets/images/down-arrow.png';
+                ?>
+
+
+                <button class="vote" onclick="vote(<?php echo $row['id']; ?>, 1)">
+                    <img src="<?php echo $up_icon; ?>" alt="Upvote" width="24" height="24">
+                </button>
+
+                <span class="vote-count" id="votes-<?php echo $row['id']; ?>" width="24" height="24"><?php echo $row['votes']; ?></span>
+
+                <button class="vote" onclick="vote(<?php echo $row['id']; ?>, -1)">
+                    <img src="<?php echo $down_icon; ?>" alt="Downvote" width="24" height="24">
+                </button>
+
+                <button class="vote" onclick="toggleCommentPanel(<?php echo $row['id']; ?>)">
+                    <img src="assets/images/comment.png" alt="Upvote" width="24" height="24">
+                </button>
+            </div>
+
+            <?php
+            // Fetch comments for the post
+            $post_id = $row['id'];
+            $comment_query = $conn->prepare("SELECT comments.*, users.username FROM comments
+                JOIN users ON comments.user_id = users.id
+                WHERE comments.post_id = ?
+                ORDER BY comments.created_at ASC");
+
+            $comment_query->bind_param("i", $post_id);
+            $comment_query->execute();
+            $comments = $comment_query->get_result();
+            ?>
+
+            <!-- Comment Panel -->
+            <div id="comment-panel-<?php echo $row['id']; ?>" class="comment-panel">
+                <h4>Comments:</h4>
+                <button class="close-btn" onclick="closeCommentPanel(<?php echo $row['id']; ?>)">
+                    X
+                </button>
+
+                <div id="comment-list-<?php echo $row['id']; ?>" class="comment-list">
+                    <div class="comments">
+                        <?php while ($comment = $comments->fetch_assoc()): ?>
+
+                            <?php
+                            // Get current vote count
+                            $vote_query = $conn->prepare("SELECT SUM(vote) as votes, 
+                                (SELECT vote FROM comment_votes WHERE comment_id = ? AND user_id = ?) AS user_vote
+                                FROM comment_votes WHERE comment_id = ?");
+                            $vote_query->bind_param("iii", $comment['id'], $user_id, $comment['id']);
+                            $vote_query->execute();
+                            $vote_result = $vote_query->get_result();
+                            $vote_data = $vote_result->fetch_assoc();
+                            $vote_count = $vote_data['votes'] ?? 0;
+
+
+                            $user_vote = $vote_data['user_vote'];
+                            $up_icon = $user_vote == 1 ? 'assets/images/upVote-arrow.png' : 'assets/images/up-arrow.png';
+                            $down_icon = $user_vote == -1 ? 'assets/images/downVote-arrow.png' : 'assets/images/down-arrow.png';
+                            ?>
+
+                            <div class="comment-redacts">
+
+                                <div class="cooment-content">
+                                    <div class="comment-username">
+                                        <strong>@<?php echo htmlspecialchars($comment['username']); ?></strong>
+                                    </div>
+
+                                    <div class="comment-text">
+                                        <?php echo nl2br(htmlspecialchars($comment['content'])); ?>
+                                    </div>
+
+                                    <div class="comment-date">
+                                        <small>(<?php echo $comment['created_at']; ?>)</small>
+                                    </div>
+                                </div>
+
+                                <div class="vote-buttons">
+                                    <button class="vote" onclick="voteComment(<?php echo $comment['id']; ?>, 1)">
+                                        <img src="<?php echo $up_icon; ?>" alt="Upvote" width="16" height="16">
+                                    </button>
+
+                                    <span class="vote-count"><?php echo $vote_count; ?></span>
+
+                                    <button class="vote" onclick="voteComment(<?php echo $comment['id']; ?>, -1)">
+                                        <img src="<?php echo $down_icon; ?>" alt="Downvote" width="16" height="16">
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        <?php endwhile; ?>
+                    </div>
+                </div>
+
+                <form class="comment-input" onsubmit="submitComment(event, <?php echo $row['id']; ?>)">
+                    <input type="text" name="content" placeholder="Write a comment..." required>
+                    <button type="submit">Post Comment</button>
+                </form>
+            </div>
+
         </div>
     </div>
-
-    <!-- Comment Panel -->
-    <div id="comment-panel-<?php echo $row['id']; ?>" class="comment-panel">
-        <button class="close-btn" onclick="closeCommentPanel(<?php echo $row['id']; ?>)">X</button>
-
-        <div id="comment-list-<?php echo $row['id']; ?>" class="comment-list">
-            <!-- Comments will be loaded here -->
-            <div class="no-comments" id="no-comments-<?php echo $row['id']; ?>">Loading comments...</div>
-        </div>
-
-        <form class="comment-form" onsubmit="submitComment(event, <?php echo $row['id']; ?>)">
-            <textarea id="comment-input-<?php echo $row['id']; ?>" placeholder="Write a comment..." required></textarea>
-            <button type="submit">Post Comment</button>
-        </form>
-    </div>
-
 <?php endwhile; ?>
 
 <script>
-// Toggle comment panel visibility
 function toggleCommentPanel(postId) {
     const panel = document.getElementById(`comment-panel-${postId}`);
     const allPanels = document.querySelectorAll('.comment-panel');
-    
-    // Close all panels before opening the selected one
-    allPanels.forEach(p => {
-        if (p !== panel) {
-            p.style.display = 'none';
-        }
-    });
 
-    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    const isVisible = panel.classList.contains('show');
 
-    // Prevent scrolling through reels when comments are open
-    if (panel.style.display === 'block') {
-        document.body.style.overflow = 'hidden'; // Disable scrolling on the body
-        loadComments(postId);
+    // Hide all panels first
+    allPanels.forEach(p => p.classList.remove('show'));
+
+    if (!isVisible) {
+        panel.classList.add('show');
+        document.body.style.overflow = 'hidden'; // Lock scroll
     } else {
-        document.body.style.overflow = 'scroll'; // Re-enable scrolling on the body
+        document.body.style.overflow = 'auto'; // Unlock scroll
     }
 }
 
-// Close the comment panel
 function closeCommentPanel(postId) {
     const panel = document.getElementById(`comment-panel-${postId}`);
-    panel.style.display = 'none';
-    document.body.style.overflow = 'scroll'; // Re-enable scrolling on the body
+    panel.classList.remove('show');
+    document.body.style.overflow = 'auto';
 }
+
 
 // Submit a new comment
 function submitComment(event, postId) {
@@ -244,66 +209,38 @@ function submitComment(event, postId) {
     }
 }
 
-// Load comments for a specific post
-function loadComments(postId) {
-    const commentList = document.getElementById(`comment-list-${postId}`);
-    const noComments = document.getElementById(`no-comments-${postId}`);
-
-    fetch(`comments.php?post_id=${postId}`)
-        .then(response => response.json())
-        .then(comments => {
-            if (comments.length === 0) {
-                noComments.textContent = 'No comments yet.';
-            } else {
-                noComments.style.display = 'none';
-                commentList.innerHTML = '';
-                comments.forEach(comment => {
-                    const commentItem = document.createElement('div');
-                    commentItem.classList.add('comment-item');
-                    commentItem.innerHTML = `
-                        <strong>@${comment.username}</strong>
-                        <p>${comment.content}</p>
-                    `;
-                    commentList.appendChild(commentItem);
-                });
-            }
-        })
-        .catch(error => {
-            noComments.textContent = 'Error loading comments.';
-        });
-}
-
-// Function to reset all comment panels to their closed state
+// Function to reset all comment panels to their closed state (with class toggle)
 function resetCommentPanels() {
     const allPanels = document.querySelectorAll('.comment-panel');
     allPanels.forEach(panel => {
-        panel.style.display = 'none'; // Hide all comment panels by default
+        panel.classList.remove('show'); // Remove the animation class
     });
     document.body.style.overflow = 'scroll'; // Re-enable scrolling on the body
 }
 
 // Ensure comment panels are reset and closed when page loads
 window.addEventListener('load', () => {
-    resetCommentPanels(); // Close all comment panels on page load
+    resetCommentPanels();
 });
 
 // Close all open comment panels when switching tabs or navigating between pages
 window.addEventListener('popstate', () => {
-    resetCommentPanels(); // Close all comment panels on browser navigation
+    resetCommentPanels();
 });
 
-// Example: Reset the comment panels when switching between feed and loop tabs (replace with your actual tab navigation code)
+// Example: Reset the comment panels when switching between feed and loop tabs
 document.querySelectorAll('.loop-tab').forEach(tab => {
     tab.addEventListener('click', () => {
-        resetCommentPanels(); // Close all comment panels on tab switch
+        resetCommentPanels();
     });
 });
 
 document.querySelectorAll('.feed-tab').forEach(tab => {
     tab.addEventListener('click', () => {
-        resetCommentPanels(); // Close all comment panels when switching to the feed
+        resetCommentPanels();
     });
 });
+
 
 // Intersection Observer to control when videos play based on visibility
 const videoObserver = new IntersectionObserver(entries => {
@@ -314,7 +251,6 @@ const videoObserver = new IntersectionObserver(entries => {
         // Check if the video is 90% visible
         if (entry.isIntersecting && entry.intersectionRatio >= 0.9) {
             // Ensure the video fills the entire screen
-            video.style.objectFit = 'contain';  // Adjust object fit to prevent cut-off
             video.play();  // Play the video when 90% is visible
         } else {
             video.pause();  // Pause video when less than 90% is visible
@@ -328,6 +264,72 @@ const videoObserver = new IntersectionObserver(entries => {
 document.querySelectorAll('video.reel-video').forEach(video => {
     videoObserver.observe(video);
 });
+
+function vote(postId, voteValue) {
+    const formData = new FormData();
+    formData.append('post_id', postId);
+    formData.append('vote', voteValue);
+
+    fetch('vote.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            alert("Vote failed!");
+            return;
+        }
+        // Reload votes
+        location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function submitComment(event, postId) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    formData.append('post_id', postId);
+
+    fetch('comment.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            alert("Failed to comment!");
+            return;
+        }
+        // Reload page to show new comment
+        location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function voteComment(commentId, vote) {
+    const formData = new FormData();
+    formData.append('comment_id', commentId);
+    formData.append('vote', vote);
+    
+        fetch('comment_vote.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            alert("Failed to vote.");
+            return;
+        }
+        location.reload(); // reload page to update vote counts
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
 </script>
 
 

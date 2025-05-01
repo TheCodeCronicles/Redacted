@@ -33,7 +33,7 @@ CREATE TABLE `comment_votes` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `comment_votes_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE,
   CONSTRAINT `comment_votes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -42,7 +42,7 @@ CREATE TABLE `comment_votes` (
 
 LOCK TABLES `comment_votes` WRITE;
 /*!40000 ALTER TABLE `comment_votes` DISABLE KEYS */;
-INSERT INTO `comment_votes` VALUES (1,1,1,1,'2025-04-29 17:02:53'),(2,1,2,1,'2025-04-30 10:34:32'),(3,2,2,1,'2025-04-30 12:38:29'),(4,3,3,1,'2025-04-30 14:38:25'),(5,4,3,-1,'2025-04-30 14:38:41'),(6,4,5,1,'2025-05-01 09:10:30');
+INSERT INTO `comment_votes` VALUES (1,1,1,1,'2025-04-29 17:02:53'),(2,1,2,1,'2025-04-30 10:34:32'),(3,2,2,1,'2025-04-30 12:38:29'),(4,3,3,1,'2025-04-30 14:38:25'),(5,4,3,-1,'2025-04-30 14:38:41'),(6,4,5,1,'2025-05-01 09:10:30'),(7,6,1,1,'2025-05-01 13:15:42'),(8,7,1,1,'2025-05-01 13:16:30'),(9,9,5,1,'2025-05-01 13:47:29'),(10,6,5,1,'2025-05-01 14:45:00'),(11,5,5,1,'2025-05-01 14:49:28'),(12,8,5,1,'2025-05-01 15:09:00'),(13,7,5,1,'2025-05-01 15:30:36'),(14,10,5,1,'2025-05-01 17:05:12'),(15,12,5,-1,'2025-05-01 19:03:07'),(16,5,6,1,'2025-05-01 19:27:28'),(17,7,6,1,'2025-05-01 19:36:19'),(18,11,6,-1,'2025-05-01 19:38:10');
 /*!40000 ALTER TABLE `comment_votes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -64,7 +64,7 @@ CREATE TABLE `comments` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
   CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -73,7 +73,7 @@ CREATE TABLE `comments` (
 
 LOCK TABLES `comments` WRITE;
 /*!40000 ALTER TABLE `comments` DISABLE KEYS */;
-INSERT INTO `comments` VALUES (1,2,1,'Yooo this is fireee!!!','2025-04-29 14:57:19'),(2,2,2,'Pigeon?? Legendary!!!','2025-04-30 12:38:25'),(3,4,2,'🔥🔥🔥🔥','2025-04-30 13:07:49'),(4,4,3,'kwaai','2025-04-30 14:38:37'),(5,7,5,'🔥🔥🔥🔥','2025-05-01 08:58:26');
+INSERT INTO `comments` VALUES (1,2,1,'Yooo this is fireee!!!','2025-04-29 14:57:19'),(2,2,2,'Pigeon?? Legendary!!!','2025-04-30 12:38:25'),(3,4,2,'🔥🔥🔥🔥','2025-04-30 13:07:49'),(4,4,3,'kwaai','2025-04-30 14:38:37'),(5,7,5,'🔥🔥🔥🔥','2025-05-01 08:58:26'),(6,7,4,'HEHEHE','2025-05-01 13:11:58'),(7,7,1,'This is [REDACTED]','2025-05-01 13:16:15'),(8,6,1,'404 This post is [REDACTED]','2025-05-01 13:31:29'),(9,8,5,'It\'s giving TRON x PACMAN','2025-05-01 13:47:26'),(10,8,5,'🔥🔥🔥🔥','2025-05-01 17:04:55'),(11,7,5,'No way this actually happened... right!?','2025-05-01 17:31:13'),(12,6,5,'Yooooo!','2025-05-01 17:37:18'),(13,7,6,'This is a loooooooooooooonnnnnnggggggggg coooooooommmmmmeeeennnnntttt!!!!','2025-05-01 19:27:20');
 /*!40000 ALTER TABLE `comments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -180,7 +180,7 @@ CREATE TABLE `post_votes` (
   KEY `post_id` (`post_id`),
   CONSTRAINT `post_votes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `post_votes_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=86 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,7 +189,7 @@ CREATE TABLE `post_votes` (
 
 LOCK TABLES `post_votes` WRITE;
 /*!40000 ALTER TABLE `post_votes` DISABLE KEYS */;
-INSERT INTO `post_votes` VALUES (1,1,1,1,'2025-04-29 09:14:51'),(8,1,2,1,'2025-04-29 17:02:52'),(13,2,2,1,'2025-04-30 10:34:43'),(31,2,3,1,'2025-04-30 11:26:26'),(32,1,3,1,'2025-04-30 11:26:43'),(43,2,1,1,'2025-04-30 12:46:10'),(50,2,4,1,'2025-04-30 13:07:18'),(51,3,4,1,'2025-04-30 14:38:28'),(52,3,3,1,'2025-04-30 14:38:59'),(53,3,5,1,'2025-04-30 18:37:02'),(56,3,6,1,'2025-04-30 18:52:45'),(57,2,7,1,'2025-05-01 06:50:56'),(58,5,8,1,'2025-05-01 08:58:11'),(59,5,3,1,'2025-05-01 09:00:52'),(60,5,7,1,'2025-05-01 09:01:15'),(61,5,6,1,'2025-05-01 09:01:20'),(62,5,5,1,'2025-05-01 09:10:22');
+INSERT INTO `post_votes` VALUES (1,1,1,1,'2025-04-29 09:14:51'),(8,1,2,1,'2025-04-29 17:02:52'),(13,2,2,1,'2025-04-30 10:34:43'),(31,2,3,1,'2025-04-30 11:26:26'),(32,1,3,1,'2025-04-30 11:26:43'),(43,2,1,1,'2025-04-30 12:46:10'),(50,2,4,1,'2025-04-30 13:07:18'),(51,3,4,1,'2025-04-30 14:38:28'),(52,3,3,1,'2025-04-30 14:38:59'),(53,3,5,1,'2025-04-30 18:37:02'),(56,3,6,1,'2025-04-30 18:52:45'),(57,2,7,1,'2025-05-01 06:50:56'),(58,5,8,1,'2025-05-01 08:58:11'),(59,5,3,1,'2025-05-01 09:00:52'),(60,5,7,1,'2025-05-01 09:01:15'),(61,5,6,1,'2025-05-01 09:01:20'),(62,5,5,1,'2025-05-01 09:10:22'),(64,4,7,1,'2025-05-01 12:50:11'),(65,1,7,1,'2025-05-01 13:16:37'),(66,1,6,1,'2025-05-01 13:31:38'),(82,6,8,1,'2025-05-01 19:28:08'),(84,6,7,1,'2025-05-01 19:28:21'),(85,6,6,1,'2025-05-01 19:38:02');
 /*!40000 ALTER TABLE `post_votes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -287,4 +287,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-01 13:57:55
+-- Dump completed on 2025-05-01 22:12:39
