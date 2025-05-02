@@ -49,9 +49,12 @@ $posts = $post_stmt->get_result();
                 <h2>@<?php echo htmlspecialchars($username); ?></h2>
                 <p><?php echo nl2br(htmlspecialchars($user_data['bio'] ?? '')); ?></p>
                 <?php if ($is_own_profile): ?>
-                    <a href="edit_profile.php" class="btn">Edit Profile</a>
+                    <form action="edit_profile.php" method="get">
+                        <button type="submit" class="edit-profile-btn">Edit Profile</button>
+                    </form>
                 <?php endif; ?>
             </div>
+
         </div>
         <?php
             $all_posts = [];
@@ -61,7 +64,7 @@ $posts = $post_stmt->get_result();
         ?>
 
 
-        <div class="profile-tabs">
+        <div class="tabs-buttons">
             <button class="tab-btn active" data-tab="posts">Posts</button>
             <button class="tab-btn" data-tab="reels">Redacts</button>
             <button class="tab-btn" data-tab="tagged">Tagged</button>
