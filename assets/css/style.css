@@ -595,40 +595,77 @@ nav a:hover {
     border-radius: 8px;
 }
 
+.edit-profile-btn {
+    border: 1px solid #007bff; /* Highlight line */
+    color: white;
+    font-weight: bold;
+    background-color: rgba(0, 123, 255, 0.1); /* subtle blue background */
+}
+
+.edit-profile-btn:hover {
+    background-color: #007dc1;
+}
+
+.edit-profile-btn:active {
+    transform: scale(0.97);
+}
+
 /* Tabs on profile style */
 
-.profile-tabs {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid #ddd;
+.tab-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
 .tab-btn {
-  background: none;
-  border: none;
-  padding: 1rem 0;
-  font-size: 1rem;
-  font-weight: bold;
-  color: #555;
-  cursor: pointer;
-  position: relative;
+    padding: 0.5rem 1.2rem;
+    border: none;
+    background-color: transparent;
+    font-weight: bold;
+    color: #888;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
 }
+
+.tab-btn:hover {
+  background-color: rgba(0, 123, 255, 0.2);
+}
+
 
 .tab-btn.active {
-  color: #000;
+    border-bottom: 2px solid #007bff; /* Highlight line */
+    color: white;
+    font-weight: bold;
+    background-color: rgba(0, 123, 255, 0.1); /* subtle blue background */
+    transition: all 0.3s ease;
 }
 
-.tab-btn.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: #000;
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
 }
+
+.tab-content.active {
+    display: block;
+}
+
+/* Optional fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 
 .tab-content {
   display: none;
