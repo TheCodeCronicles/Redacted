@@ -53,17 +53,25 @@ $posts = $post_stmt->get_result();
                 <?php endif; ?>
             </div>
         </div>
+        <?php
+            $all_posts = [];
+            while ($post = $posts->fetch_assoc()) {
+                $all_posts[] = $post;
+            }
+        ?>
+
 
         <div class="profile-tabs">
             <button class="tab-btn active" data-tab="posts">Posts</button>
-            <button class="tab-btn" data-tab="reels">Reels</button>
+            <button class="tab-btn" data-tab="reels">Redacts</button>
             <button class="tab-btn" data-tab="tagged">Tagged</button>
         </div>
 
         <div class="profile-tab-content">
+            <!-- Posts tab: show everything -->
             <div class="tab-content active" id="posts">
                 <div class="profile-grid">
-                    <?php while ($post = $posts->fetch_assoc()): ?>
+                    <?php foreach ($all_posts as $post): ?>
                         <?php
                             $ext = strtolower(pathinfo($post['image_path'], PATHINFO_EXTENSION));
                             if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
@@ -73,18 +81,36 @@ $posts = $post_stmt->get_result();
                                     <source src="<?php echo htmlspecialchars($post['image_path']); ?>" type="video/<?php echo $ext; ?>">
                                 </video>
                             <?php endif; ?>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 </div>
             </div>
                             
+            <!-- Redacts tab: show videos only -->
             <div class="tab-content" id="reels">
-                <p>No reels yet.</p>
+                <div class="profile-grid">
+                    <?php
+                    $has_reels = false;
+                    foreach ($all_posts as $post):
+                        $ext = strtolower(pathinfo($post['image_path'], PATHINFO_EXTENSION));
+                        if (in_array($ext, ['mp4', 'webm', 'ogg'])):
+                            $has_reels = true; ?>
+                            <video autoplay loop muted>
+                                <source src="<?php echo htmlspecialchars($post['image_path']); ?>" type="video/<?php echo $ext; ?>">
+                            </video>
+                        <?php endif;
+                    endforeach;
+                    if (!$has_reels): ?>
+                        <p>No redacts yet.</p>
+                    <?php endif; ?>
+                </div>
             </div>
-                            
+                    
+            <!-- Tagged tab -->
             <div class="tab-content" id="tagged">
                 <p>No tagged posts yet.</p>
             </div>
         </div>
+
 
 
     </div>

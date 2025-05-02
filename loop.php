@@ -47,7 +47,9 @@ $result = $stmt->get_result();
             </video>
 
             <div class="overlay">
-                <h3>@<?php echo htmlspecialchars($row['username']); ?></h3>
+                <a href="profile.php?user=<?php echo urlencode($row['username']); ?>">
+                    <h3>@<?php echo htmlspecialchars($row['username']); ?></h3>
+                </a>
                 <p><?php echo nl2br(htmlspecialchars($row['content'])); ?></p>
 
                 <small><?php echo $row['created_at']; ?></small>
@@ -122,7 +124,9 @@ $result = $stmt->get_result();
 
                                 <div class="cooment-content">
                                     <div class="comment-username">
-                                        <strong>@<?php echo htmlspecialchars($comment['username']); ?></strong>
+                                        <a href="profile.php?user=<?php echo urlencode($comment['username']); ?>">
+                                            <strong>@<?php echo htmlspecialchars($comment['username']); ?></strong>
+                                        </a>
                                     </div>
 
                                     <div class="comment-text">

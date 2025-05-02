@@ -60,7 +60,9 @@ $result = $stmt->get_result();
 
     <?php while ($row = $result->fetch_assoc()): ?>
         <div class="post">
-            <h3>@<?php echo htmlspecialchars($row['username']); ?></h3>
+            <a href="profile.php?user=<?php echo urlencode($row['username']); ?>">
+                <h3>@<?php echo htmlspecialchars($row['username']); ?></h3>
+            </a>
             <p><?php echo nl2br(htmlspecialchars($row['content'])); ?></p>
             
             <?php if (!empty($row['image_path'])): ?>
@@ -135,7 +137,9 @@ $result = $stmt->get_result();
                     ?>
 
                     <div class="comment">
-                        <strong>@<?php echo htmlspecialchars($comment['username']); ?></strong> 
+                        <a href="profile.php?user=<?php echo urlencode($comment['username']); ?>">
+                            <strong>@<?php echo htmlspecialchars($comment['username']); ?></strong>
+                        </a> 
                         <?php echo nl2br(htmlspecialchars($comment['content'])); ?>
 
                         <div class="vote-container">
