@@ -41,7 +41,7 @@ $result = $stmt->get_result();
     <header>
         <h1><img src="assets\images\[REDACTED].png" height="50"></h1>
         <p>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</p>
-        <a href="post.php">Create Post</a> | <a href="logout.php">Logout</a>
+        <a href="logout.php">Logout</a>
     </header>
 
     <!-- Scroll to Top Button -->

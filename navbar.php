@@ -111,7 +111,11 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <img src="assets/images/redacts_icon.png" alt="Loop Icon">
         [REDACTS]
     </a>
-</div>
+    <a href="post.php" class="<?= $currentPage == 'post.php' ? 'active' : '' ?>">
+        <img src="assets/images/create_icon.png" alt="Create Icon">
+        Create Post
+    </a>
+    </div>
 
 <script>
     // Function to toggle the navbar collapse

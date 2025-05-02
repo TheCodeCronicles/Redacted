@@ -19,7 +19,7 @@ $sql = "SELECT posts.*, users.username,
     LEFT JOIN post_votes ON posts.id = post_votes.post_id
     WHERE posts.image_path LIKE '%.mp4' OR posts.image_path LIKE '%.webm' OR posts.image_path LIKE '%.ogg'
     GROUP BY posts.id
-    ORDER BY posts.created_at DESC";
+    ORDER BY RAND()";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
