@@ -134,3 +134,23 @@ $loggedInUsername = isset($_SESSION['username']) ? $_SESSION['username'] : null;
         navbar.classList.toggle('collapsed'); // Toggle the 'collapsed' class on click
     }
 </script>
+
+<script>
+    function toggleNavbar() {
+        const navbar = document.querySelector('.navbar');
+        navbar.classList.toggle('collapsed');
+    }
+
+    // Auto-collapse only on 'loop.php'
+    document.addEventListener('DOMContentLoaded', () => {
+        const currentPage = "<?= $currentPage ?>";
+        if (currentPage === "loop.php") {
+            setTimeout(() => {
+                const navbar = document.querySelector('.navbar');
+                if (!navbar.classList.contains('collapsed')) {
+                    navbar.classList.add('collapsed');
+                }
+            }, 7000); // 10 seconds = 10000 ms
+        }
+    });
+</script>
