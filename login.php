@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "Incorrect password.";
         }
     } else {
-        echo "No account found with that email.";
+        echo "No account found with that email. Sign up to login!";
     }
 }
 ?>
