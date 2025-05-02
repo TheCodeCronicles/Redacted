@@ -660,5 +660,32 @@ nav a:hover {
   display: block;
 }
 
+.userforms {
+    max-width: 600px;
+    margin: 120px auto 0; /* assuming a fixed navbar */
+    padding: 20px;
+}
+
+.userforms input[type="text"],
+.userforms textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.search-results .post {
+    margin-top: 20px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.search-results img,
+.search-results video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-top: 10px;
+}
 
 
