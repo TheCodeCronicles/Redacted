@@ -61,6 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
+<?php include 'navbar.php'; ?>
     <div class="userforms">
         <form method="POST" action="" enctype="multipart/form-data">
             <h1>Create a Post</h1>
@@ -68,7 +69,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <input type="file" name="media" accept="image/*,video/*">
             <button class="btn" type="submit">Post</button>
         </form>
-        <p><a href="feed.php">Back to Feed</a></p>
     </div>
     
 </body>
