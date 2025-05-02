@@ -1,5 +1,9 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 $currentPage = basename($_SERVER['PHP_SELF']);
+$loggedInUsername = isset($_SESSION['username']) ? $_SESSION['username'] : null;
 ?>
 
 <style>
@@ -102,12 +106,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <img src="assets/images/Redacted_Logo.png" alt="Logo">
     </div>
     <a href="feed.php" class="<?= $currentPage == 'feed.php' ? 'active' : '' ?>">
-        <!-- House icon for Feed -->
         <img src="assets/images/home_icon.png" alt="House Icon">
         Feed
     </a>
     <a href="loop.php" class="<?= $currentPage == 'loop.php' ? 'active' : '' ?>">
-        <!-- Some icon for Redacted (replace with appropriate icon) -->
         <img src="assets/images/redacts_icon.png" alt="Loop Icon">
         [REDACTS]
     </a>
@@ -115,7 +117,15 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <img src="assets/images/create_icon.png" alt="Create Icon">
         Create Post
     </a>
-    </div>
+
+    <?php if ($username): ?>
+        <a href="profile.php?user=<?= urlencode($loggedInUsername) ?>" 
+        class="<?= ($currentPage == 'profile.php' && isset($_GET['user']) && $_GET['user'] === $loggedInUsername) ? 'active' : '' ?>">
+        <img src="assets/images/profile_icon.png" alt="Profile Icon">
+        My Profile
+        </a>
+    <?php endif; ?>
+</div>
 
 <script>
     // Function to toggle the navbar collapse
