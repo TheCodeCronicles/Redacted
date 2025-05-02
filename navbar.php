@@ -120,9 +120,9 @@ $loggedInUsername = isset($_SESSION['username']) ? $_SESSION['username'] : null;
 
     <?php if ($username): ?>
         <a href="profile.php?user=<?= urlencode($loggedInUsername) ?>" 
-        class="<?= ($currentPage == 'profile.php' && isset($_GET['user']) && $_GET['user'] === $loggedInUsername) ? 'active' : '' ?>">
-        <img src="assets/images/profile_icon.png" alt="Profile Icon">
-        My Profile
+            class="<?= ($currentPage == 'profile.php' && isset($_GET['user']) && $_GET['user'] === $loggedInUsername) ? 'active' : '' ?>">
+            <img src="assets/images/profile_icon.png" alt="Profile Icon">
+            My Profile
         </a>
     <?php endif; ?>
 </div>
