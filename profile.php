@@ -136,6 +136,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 </script>
 
+<?php include 'settings.php'; ?>
 
 </body>
 </html>

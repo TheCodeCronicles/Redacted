@@ -58,5 +58,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['query'])) {
             </div>
         <?php endif; ?>
     </div>
+
+    <?php include 'settings.php'; ?>
+
 </body>
 </html>

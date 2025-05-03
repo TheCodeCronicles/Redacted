@@ -344,6 +344,7 @@ document.querySelectorAll('video.reel-video').forEach(video => {
 
 </script>
 
+<?php include 'settings.php'; ?>
 
 </body>
 </html>

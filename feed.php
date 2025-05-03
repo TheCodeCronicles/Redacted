@@ -312,6 +312,7 @@ scrollToTopBtn.addEventListener('click', () => {
 </script>
 
 <?php include 'navbar.php'; ?>
+<?php include 'settings.php'; ?>
 
 </body>
 </html>
