@@ -13,7 +13,7 @@ if (session_status() === PHP_SESSION_NONE) {
 <!-- Modal -->
 <div class="settings-modal" id="settingsModal">
     <h3>Settings</h3>
-    <form action="update_password.php" method="POST">
+    <form action="change_password.php" method="POST">
         <input type="password" name="current_password" placeholder="Current Password" required>
         <input type="password" name="new_password" placeholder="New Password" required>
         <input type="password" name="confirm_password" placeholder="Confirm Password" required>
