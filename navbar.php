@@ -105,23 +105,27 @@ $loggedInUsername = isset($_SESSION['username']) ? $_SESSION['username'] : null;
         <!-- Image for Logo -->
         <img src="assets/images/Redacted_Logo.png" alt="Logo">
     </div>
+    <a href="search.php" class="<?= $currentPage == 'search.php' ? 'active' : '' ?>">
+    <img src="assets/images/search_icon.png" alt="Search Icon">
+    Search
+    </a>
     <a href="feed.php" class="<?= $currentPage == 'feed.php' ? 'active' : '' ?>">
         <img src="assets/images/home_icon.png" alt="House Icon">
         Feed
-    </a>
-    <a href="loop.php" class="<?= $currentPage == 'loop.php' ? 'active' : '' ?>">
-        <img src="assets/images/redacts_icon.png" alt="Loop Icon">
-        [REDACTS]
     </a>
     <a href="post.php" class="<?= $currentPage == 'post.php' ? 'active' : '' ?>">
         <img src="assets/images/create_icon.png" alt="Create Icon">
         Create Post
     </a>
+    <a href="loop.php" class="<?= $currentPage == 'loop.php' ? 'active' : '' ?>">
+        <img src="assets/images/redacts_icon.png" alt="Loop Icon">
+        [REDACTS]
+    </a>
 
     <?php if ($username): ?>
         <a href="profile.php?user=<?= urlencode($loggedInUsername) ?>" 
             class="<?= ($currentPage == 'profile.php' && isset($_GET['user']) && $_GET['user'] === $loggedInUsername) ? 'active' : '' ?>">
-            <img src="assets/images/profile_icon.png" alt="Profile Icon">
+            <img src="assets/images/default.png" alt="Profile Icon">
             My Profile
         </a>
     <?php endif; ?>

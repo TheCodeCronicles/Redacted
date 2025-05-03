@@ -255,6 +255,7 @@ document.querySelectorAll('.close-modal').forEach(btn => {
 
 </script>
 
+<?php include 'settings.php'; ?>
 
 </body>
 </html>
