@@ -76,7 +76,7 @@ if (!$is_own_profile) {
                         <input type="hidden" name="follow_id" value="<?php echo $user_data['id']; ?>">
                         <input type="hidden" name="username" value="<?php echo htmlspecialchars($username); ?>">
                         <button class="btn follow-btn <?php echo $is_following ? 'unfollow' : 'follow'; ?>" type="submit" name="action" value="<?php echo $is_following ? 'unfollow' : 'follow'; ?>">
-                            <?php echo $is_following ? 'Unfollow' : 'Follow'; ?>
+                            <?php echo $is_following ? 'Following' : 'Follow'; ?>
                         </button>
                     </form>
                 <?php endif; ?>
@@ -233,7 +233,7 @@ document.querySelectorAll('.follow-stats span').forEach(span => {
                 <input type="hidden" name="username" value="<?php echo htmlspecialchars($username); ?>">
                 <button type="submit" name="action" value="${user.is_following ? 'unfollow' : 'follow'}"
                   class="btn follow-btn ${user.is_following ? 'unfollow' : 'follow'}">
-                  ${user.is_following ? 'Unfollow' : 'Follow'}
+                  ${user.is_following ? 'Following' : 'Follow'}
                 </button>
               `;
               li.appendChild(followForm);
