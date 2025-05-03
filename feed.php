@@ -38,11 +38,13 @@ $result = $stmt->get_result();
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <header>
-        <h1><img src="assets\images\[REDACTED].png" height="50"></h1>
-        <p>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</p>
-        <a href="logout.php">Logout</a>
-    </header>
+<header>
+    <h1><img src="assets/images/[REDACTED].png" height="50" alt="Logo"></h1>
+    <p>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</p>
+    <a href="logout.php">
+        <img src="assets/images/logout-icon.png" alt="Logout" height="30">
+    </a>
+</header>
 
     <!-- Scroll to Top Button -->
     <button id="scrollToTopBtn" title="Go to top">↑</button>
