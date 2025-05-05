@@ -39,11 +39,21 @@ $result = $stmt->get_result();
 <?php include 'navbar.php'; ?>
 
 <?php while ($row = $result->fetch_assoc()): ?>
-    <div class="video-post">
+    <div class="video-post" data-post-id="<?php echo $row['id']; ?>" id="post-<?php echo $row['id']; ?>">
         <div class="reel-frame">
             <video class="reel-video" autoplay loop playsinline>
-                <source src="<?php echo htmlspecialchars($row['image_path']); ?>" type="video/mp4">
-                Your browser does not support the video tag.
+                <?php
+                    $videoType = '';
+                    $path = $row['image_path'];
+                    if (str_ends_with($path, '.webm')) {
+                        $videoType = 'video/webm';
+                    } elseif (str_ends_with($path, '.ogg')) {
+                        $videoType = 'video/ogg';
+                    } else {
+                        $videoType = 'video/mp4';
+                    }
+                    ?>
+                    <source src="<?php echo htmlspecialchars($path); ?>" type="<?php echo $videoType; ?>">
             </video>
 
             <div class="overlay">
@@ -120,9 +130,9 @@ $result = $stmt->get_result();
                             $down_icon = $user_vote == -1 ? 'assets/images/downVote-arrow.png' : 'assets/images/down-arrow.png';
                             ?>
 
-                            <div class="comment-redacts">
+                            <div class="comment-redacts" data-comment-id="<?php echo $comment['id']; ?>">
 
-                                <div class="cooment-content">
+                                <div class="comment-content">
                                     <div class="comment-username">
                                         <a href="profile.php?user=<?php echo urlencode($comment['username']); ?>">
                                             <strong>@<?php echo htmlspecialchars($comment['username']); ?></strong>
@@ -139,18 +149,16 @@ $result = $stmt->get_result();
                                 </div>
 
                                 <div class="vote-buttons">
-                                    <button class="vote" onclick="voteComment(<?php echo $comment['id']; ?>, 1)">
+                                    <button class="vote vote-up" onclick="voteComment(<?php echo $comment['id']; ?>, 1)">
                                         <img src="<?php echo $up_icon; ?>" alt="Upvote" width="16" height="16">
                                     </button>
 
                                     <span class="vote-count"><?php echo $vote_count; ?></span>
 
-                                    <button class="vote" onclick="voteComment(<?php echo $comment['id']; ?>, -1)">
+                                    <button class="vote vote-down" onclick="voteComment(<?php echo $comment['id']; ?>, -1)">
                                         <img src="<?php echo $down_icon; ?>" alt="Downvote" width="16" height="16">
                                     </button>
-
                                 </div>
-
                             </div>
 
                         <?php endwhile; ?>
@@ -189,28 +197,6 @@ function closeCommentPanel(postId) {
     const panel = document.getElementById(`comment-panel-${postId}`);
     panel.classList.remove('show');
     document.body.style.overflow = 'auto';
-}
-
-
-// Submit a new comment
-function submitComment(event, postId) {
-    event.preventDefault();
-    const commentInput = document.getElementById(`comment-input-${postId}`);
-    const content = commentInput.value.trim();
-
-    if (content) {
-        fetch('comment.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `post_id=${postId}&content=${encodeURIComponent(content)}`
-        })
-        .then(response => response.text())
-        .then(data => {
-            commentInput.value = ''; // Clear the input field
-            loadComments(postId); // Reload the comments
-        })
-        .catch(error => alert('Failed to post comment'));
-    }
 }
 
 // Function to reset all comment panels to their closed state (with class toggle)
@@ -269,27 +255,46 @@ document.querySelectorAll('video.reel-video').forEach(video => {
     videoObserver.observe(video);
 });
 
-function vote(postId, voteValue) {
+function vote(postId, vote) {
     const formData = new FormData();
     formData.append('post_id', postId);
-    formData.append('vote', voteValue);
+    formData.append('vote', vote);
 
     fetch('vote.php', {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        if (!response.ok) {
-            alert("Vote failed!");
-            return;
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const container = document.querySelector(`[data-post-id="${postId}"]`) || document.getElementById(`post-${postId}`);
+            if (!container) return;
+
+            // Update count
+            const voteCountElem = container.querySelector(`#votes-${postId}`);
+            if (voteCountElem) voteCountElem.textContent = data.vote_count;
+
+            // Update icons
+            const upImg = container.querySelector('button.vote:nth-of-type(1) img');
+            const downImg = container.querySelector('button.vote:nth-of-type(2) img');
+
+            if (data.user_vote == 1) {
+                upImg.src = "assets/images/upVote-arrow.png";
+                downImg.src = "assets/images/down-arrow.png";
+            } else if (data.user_vote == -1) {
+                upImg.src = "assets/images/up-arrow.png";
+                downImg.src = "assets/images/downVote-arrow.png";
+            } else {
+                upImg.src = "assets/images/up-arrow.png";
+                downImg.src = "assets/images/down-arrow.png";
+            }
+        } else {
+            alert(data.message || "Error voting.");
         }
-        // Reload votes
-        location.reload();
     })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+    .catch(err => console.error('Vote error:', err));
 }
+
 
 function submitComment(event, postId) {
     event.preventDefault();
@@ -301,39 +306,69 @@ function submitComment(event, postId) {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        if (!response.ok) {
-            alert("Failed to comment!");
-            return;
+    .then(response => response.text())
+    .then(result => {
+        if (result === 'success') {
+            form.reset(); // Clear the form input
+            loadComments(postId); // Reload comments dynamically
+        } else {
+            alert("Failed to post comment.");
         }
-        // Reload page to show new comment
-        location.reload();
     })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+    .catch(error => console.error("Error submitting comment:", error));
 }
+
+
+function loadComments(postId) {
+    fetch(`comment.php?post_id=${postId}`)
+    .then(response => response.text())
+    .then(html => {
+        document.getElementById(`comment-list-${postId}`).innerHTML = html;
+    })
+    .catch(error => console.error("Failed to load comments:", error));
+}
+
 
 function voteComment(commentId, vote) {
     const formData = new FormData();
     formData.append('comment_id', commentId);
     formData.append('vote', vote);
-    
-        fetch('comment_vote.php', {
+
+    fetch('comment_vote.php', {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        if (!response.ok) {
-            alert("Failed to vote.");
-            return;
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Update vote count
+            const comment = document.querySelector(`[data-comment-id="${commentId}"]`);
+            if (comment) {
+                const voteCount = comment.querySelector('.vote-count');
+                const upButton = comment.querySelector('.vote-up img');
+                const downButton = comment.querySelector('.vote-down img');
+
+                voteCount.textContent = data.vote_count;
+
+                // Update icons based on new vote
+                if (data.user_vote == 1) {
+                    upButton.src = "assets/images/upVote-arrow.png";
+                    downButton.src = "assets/images/down-arrow.png";
+                } else if (data.user_vote == -1) {
+                    upButton.src = "assets/images/up-arrow.png";
+                    downButton.src = "assets/images/downVote-arrow.png";
+                } else {
+                    upButton.src = "assets/images/up-arrow.png";
+                    downButton.src = "assets/images/down-arrow.png";
+                }
+            }
+        } else {
+            alert(data.message || "Voting failed.");
         }
-        location.reload(); // reload page to update vote counts
     })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+    .catch(error => console.error("Voting error:", error));
 }
+
 
 // Toggle mute/unmute on video click
 document.querySelectorAll('video.reel-video').forEach(video => {

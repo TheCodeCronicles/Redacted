@@ -3,6 +3,7 @@ body {
     color: #fff;
     font-family: 'Arial', sans-serif;
     text-align: center;
+    justify-content: center;
     padding-top: 120px; /* leave space for fixed header */
     margin: 0;
 }
@@ -12,7 +13,22 @@ body::-webkit-scrollbar {
 }
 
 .container {
+    display: flex;
+    margin: 0 auto;
     padding: 0 15%;
+    width: 100%;
+    max-width: 750px;
+    aspect-ratio: 1 / 1;
+    background-color: black;
+    border-radius: 10px;
+}
+
+.post {
+    position: relative;
+    background-color: #1a1a1a;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: left;
 }
 
 input, button {
@@ -72,13 +88,6 @@ section {
     display: flex;
     flex-direction: column;
     gap: 20px;
-}
-
-.post {
-    background-color: #1a1a1a;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: left;
 }
 
 .post h3 {
@@ -249,7 +258,7 @@ a .btn:hover {
 .reel-frame {
     position: relative;
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     aspect-ratio: 9 / 16;
     background-color: black;
     overflow: hidden;

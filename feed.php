@@ -61,7 +61,8 @@ $result = $stmt->get_result();
     </div>
 
     <?php while ($row = $result->fetch_assoc()): ?>
-        <div class="post">
+        <div class="post" data-post-id="<?php echo $row['id']; ?>" id="post-<?php echo $row['id']; ?>">
+            <div class="post-frame">
             <a href="profile.php?user=<?php echo urlencode($row['username']); ?>">
                 <h3>@<?php echo htmlspecialchars($row['username']); ?></h3>
             </a>
@@ -102,6 +103,10 @@ $result = $stmt->get_result();
                 <button class="vote" onclick="vote(<?php echo $row['id']; ?>, -1)">
                     <img src="<?php echo $down_icon; ?>" alt="Downvote" width="24" height="24">
                 </button>
+
+                <button class="vote" onclick="toggleCommentPanel(<?php echo $row['id']; ?>)">
+                    <img src="assets/images/comment.png" alt="Upvote" width="24" height="24">
+                </button>
             </div>
             
             <?php
@@ -116,131 +121,245 @@ $result = $stmt->get_result();
             $comment_query->execute();
             $comments = $comment_query->get_result();
             ?>
-            
-            <div class="comments">
+            <!-- Comment Panel -->
+            <div id="comment-panel-<?php echo $row['id']; ?>" class="comment-panel">
                 <h4>Comments:</h4>
-                <?php while ($comment = $comments->fetch_assoc()): ?>
+                <button class="close-btn" onclick="closeCommentPanel(<?php echo $row['id']; ?>)">
+                    X
+                </button>
 
-                    <?php
-                    // Get current vote count
-                    $vote_query = $conn->prepare("SELECT SUM(vote) as votes, 
-                        (SELECT vote FROM comment_votes WHERE comment_id = ? AND user_id = ?) AS user_vote
-                        FROM comment_votes WHERE comment_id = ?");
-                    $vote_query->bind_param("iii", $comment['id'], $user_id, $comment['id']);
-                    $vote_query->execute();
-                    $vote_result = $vote_query->get_result();
-                    $vote_data = $vote_result->fetch_assoc();
-                    $vote_count = $vote_data['votes'] ?? 0;
+                <div id="comment-list-<?php echo $row['id']; ?>" class="comment-list">
+                    <div class="comments">
+                        <?php while ($comment = $comments->fetch_assoc()): ?>
+
+                            <?php
+                            // Get current vote count
+                            $vote_query = $conn->prepare("SELECT SUM(vote) as votes, 
+                                (SELECT vote FROM comment_votes WHERE comment_id = ? AND user_id = ?) AS user_vote
+                                FROM comment_votes WHERE comment_id = ?");
+                            $vote_query->bind_param("iii", $comment['id'], $user_id, $comment['id']);
+                            $vote_query->execute();
+                            $vote_result = $vote_query->get_result();
+                            $vote_data = $vote_result->fetch_assoc();
+                            $vote_count = $vote_data['votes'] ?? 0;
 
 
-                    $user_vote = $vote_data['user_vote'];
-                    $up_icon = $user_vote == 1 ? 'assets/images/upVote-arrow.png' : 'assets/images/up-arrow.png';
-                    $down_icon = $user_vote == -1 ? 'assets/images/downVote-arrow.png' : 'assets/images/down-arrow.png';
-                    ?>
+                            $user_vote = $vote_data['user_vote'];
+                            $up_icon = $user_vote == 1 ? 'assets/images/upVote-arrow.png' : 'assets/images/up-arrow.png';
+                            $down_icon = $user_vote == -1 ? 'assets/images/downVote-arrow.png' : 'assets/images/down-arrow.png';
+                            ?>
 
-                    <div class="comment">
-                        <a href="profile.php?user=<?php echo urlencode($comment['username']); ?>">
-                            <strong>@<?php echo htmlspecialchars($comment['username']); ?></strong>
-                        </a> 
-                        <?php echo nl2br(htmlspecialchars($comment['content'])); ?>
+                            <div class="comment-redacts" data-comment-id="<?php echo $comment['id']; ?>">
 
-                        <div class="vote-container">
-                            <button class="vote" onclick="voteComment(<?php echo $comment['id']; ?>, 1)">
-                                <img src="<?php echo $up_icon; ?>" alt="Upvote" width="24" height="24">
-                            </button>
+                                <div class="comment-content">
+                                    <div class="comment-username">
+                                        <a href="profile.php?user=<?php echo urlencode($comment['username']); ?>">
+                                            <strong>@<?php echo htmlspecialchars($comment['username']); ?></strong>
+                                        </a>
+                                    </div>
 
-                            <span class="vote-count"><?php echo $vote_count; ?></span>
+                                    <div class="comment-text">
+                                        <?php echo nl2br(htmlspecialchars($comment['content'])); ?>
+                                    </div>
 
-                            <button class="vote" onclick="voteComment(<?php echo $comment['id']; ?>, -1)">
-                                <img src="<?php echo $down_icon; ?>" alt="Downvote" width="24" height="24">
-                            </button>
-                            
-                        </div>
+                                    <div class="comment-date">
+                                        <small>(<?php echo $comment['created_at']; ?>)</small>
+                                    </div>
+                                </div>
 
-                        <small>(<?php echo $comment['created_at']; ?>)</small>
+                                <div class="vote-buttons">
+                                    <button class="vote vote-up" onclick="voteComment(<?php echo $comment['id']; ?>, 1)">
+                                        <img src="<?php echo $up_icon; ?>" alt="Upvote" width="16" height="16">
+                                    </button>
+
+                                    <span class="vote-count"><?php echo $vote_count; ?></span>
+
+                                    <button class="vote vote-down" onclick="voteComment(<?php echo $comment['id']; ?>, -1)">
+                                        <img src="<?php echo $down_icon; ?>" alt="Downvote" width="16" height="16">
+                                    </button>
+                                </div>
+                            </div>
+
+                        <?php endwhile; ?>
                     </div>
-                    
-                <?php endwhile; ?>
-            </div>  
+                </div>
 
-            <!-- Add Comment Form -->
-            <form onsubmit="submitComment(event, <?php echo $row['id']; ?>)">
-                <input type="text" name="content" placeholder="Write a comment..." required style="width:70%;">
-                <button class="btn" type="submit">Post</button>
-            </form>
+                <form onsubmit="submitComment(event, <?php echo $row['id']; ?>)" id="comment-form-<?php echo $row['id']; ?>">
+                    <input type="text" name="content" placeholder="Write a comment..." required style="width: 70%;">
+                    <button class="btn" type="submit">Post</button>
+                </form>
+            </div>
+            
+
             
             <small><?php echo $row['created_at']; ?></small>
         </div>
-
+    </div>
     <?php endwhile; ?>
     </section>
-    </div>
+</div>
 
 <script>
-function vote(postId, voteValue) {
+function vote(postId, vote) {
     const formData = new FormData();
     formData.append('post_id', postId);
-    formData.append('vote', voteValue);
+    formData.append('vote', vote);
 
     fetch('vote.php', {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        if (!response.ok) {
-            alert("Vote failed!");
-            return;
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const container = document.querySelector(`[data-post-id="${postId}"]`) || document.getElementById(`post-${postId}`);
+            if (!container) return;
+
+            // Update count
+            const voteCountElem = container.querySelector(`#votes-${postId}`);
+            if (voteCountElem) voteCountElem.textContent = data.vote_count;
+
+            // Update icons
+            const upImg = container.querySelector('button.vote:nth-of-type(1) img');
+            const downImg = container.querySelector('button.vote:nth-of-type(2) img');
+
+            if (data.user_vote == 1) {
+                upImg.src = "assets/images/upVote-arrow.png";
+                downImg.src = "assets/images/down-arrow.png";
+            } else if (data.user_vote == -1) {
+                upImg.src = "assets/images/up-arrow.png";
+                downImg.src = "assets/images/downVote-arrow.png";
+            } else {
+                upImg.src = "assets/images/up-arrow.png";
+                downImg.src = "assets/images/down-arrow.png";
+            }
+        } else {
+            alert(data.message || "Error voting.");
         }
-        // Reload votes
-        location.reload();
     })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+    .catch(err => console.error('Vote error:', err));
 }
+
+function toggleCommentPanel(postId) {
+    const panel = document.getElementById(`comment-panel-${postId}`);
+    const allPanels = document.querySelectorAll('.comment-panel');
+
+    const isVisible = panel.classList.contains('show');
+
+    // Hide all panels first
+    allPanels.forEach(p => p.classList.remove('show'));
+
+    if (!isVisible) {
+        panel.classList.add('show');
+        document.body.style.overflow = 'hidden'; // Lock scroll
+    } else {
+        document.body.style.overflow = 'auto'; // Unlock scroll
+    }
+}
+
+function closeCommentPanel(postId) {
+    const panel = document.getElementById(`comment-panel-${postId}`);
+    panel.classList.remove('show');
+    document.body.style.overflow = 'auto';
+}
+
+// Function to reset all comment panels to their closed state (with class toggle)
+function resetCommentPanels() {
+    const allPanels = document.querySelectorAll('.comment-panel');
+    allPanels.forEach(panel => {
+        panel.classList.remove('show'); // Remove the animation class
+    });
+    document.body.style.overflow = 'scroll'; // Re-enable scrolling on the body
+}
+
 
 function submitComment(event, postId) {
     event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
+
+    const form = document.getElementById(`comment-form-${postId}`);
+    const input = form.querySelector('input[name="content"]');
+    const content = input.value.trim();
+
+    if (content === '') return;
+
+    const formData = new FormData();
     formData.append('post_id', postId);
+    formData.append('content', content);
 
     fetch('comment.php', {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        if (!response.ok) {
-            alert("Failed to comment!");
-            return;
+    .then(res => res.text())
+    .then(res => {
+        if (res === 'success') {
+            input.value = '';
+            loadComments(postId); // Reload the list
+        } else {
+            alert('Failed to post comment.');
         }
-        // Reload page to show new comment
-        location.reload();
     })
-    .catch(error => {
-        console.error('Error:', error);
+    .catch(err => {
+        console.error(err);
+        alert('Error posting comment.');
     });
 }
+
+function loadComments(postId) {
+    const container = document.getElementById(`comment-list-${postId}`);
+
+    fetch(`comment.php?post_id=${postId}`)
+        .then(res => res.text())
+        .then(html => {
+            container.innerHTML = html;
+        })
+        .catch(err => {
+            console.error(err);
+        });
+}
+
+// OPTIONAL: Load comments on page load if needed
+// document.addEventListener('DOMContentLoaded', () => loadComments(YOUR_POST_ID));
+
 
 function voteComment(commentId, vote) {
     const formData = new FormData();
     formData.append('comment_id', commentId);
     formData.append('vote', vote);
-    
-        fetch('comment_vote.php', {
+
+    fetch('comment_vote.php', {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        if (!response.ok) {
-            alert("Failed to vote.");
-            return;
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Update vote count
+            const comment = document.querySelector(`[data-comment-id="${commentId}"]`);
+            if (comment) {
+                const voteCount = comment.querySelector('.vote-count');
+                const upButton = comment.querySelector('.vote-up img');
+                const downButton = comment.querySelector('.vote-down img');
+
+                voteCount.textContent = data.vote_count;
+
+                // Update icons based on new vote
+                if (data.user_vote == 1) {
+                    upButton.src = "assets/images/upVote-arrow.png";
+                    downButton.src = "assets/images/down-arrow.png";
+                } else if (data.user_vote == -1) {
+                    upButton.src = "assets/images/up-arrow.png";
+                    downButton.src = "assets/images/downVote-arrow.png";
+                } else {
+                    upButton.src = "assets/images/up-arrow.png";
+                    downButton.src = "assets/images/down-arrow.png";
+                }
+            }
+        } else {
+            alert(data.message || "Voting failed.");
         }
-        location.reload(); // reload page to update vote counts
     })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+    .catch(error => console.error("Voting error:", error));
 }
 
 
