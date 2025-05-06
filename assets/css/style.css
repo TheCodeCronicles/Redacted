@@ -75,13 +75,24 @@ header {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 98%;
     background-color: #000;
     z-index: 999;
-    padding: 2px 2px;
-    transition: top 0.4s ease;
-    text-align: center;
+    padding: 40px 10px;
     border-bottom: 1px solid #222;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: auto;
+    transition: top 0.4s ease; 
+}
+
+header h1 {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
 }
 
 section {

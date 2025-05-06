@@ -39,8 +39,10 @@ $result = $stmt->get_result();
 </head>
 <body>
 <header>
-    <h1><img src="assets/images/[REDACTED].png" height="50" alt="Logo"></h1>
     <p>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</p>
+    <h1>
+        <img src="assets/images/[REDACTED].png" height="50" alt="Logo">
+    </h1>
     <a href="logout.php">
         <img src="assets/images/logout-icon.png" alt="Logout" height="30">
     </a>

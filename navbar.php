@@ -145,16 +145,38 @@ $loggedInUsername = isset($_SESSION['username']) ? $_SESSION['username'] : null;
         navbar.classList.toggle('collapsed');
     }
 
-    // Auto-collapse only on 'loop.php'
     document.addEventListener('DOMContentLoaded', () => {
-        const currentPage = "<?= $currentPage ?>";
-        if (currentPage === "loop.php") {
-            setTimeout(() => {
-                const navbar = document.querySelector('.navbar');
+    const currentPage = "<?= $currentPage ?>";
+    if (currentPage === "loop.php") {
+        const navbar = document.querySelector('.navbar');
+
+        function scheduleAutoCollapse() {
+            // Clear any previous timers to prevent stacking
+            if (navbar._collapseTimeout) {
+                clearTimeout(navbar._collapseTimeout);
+            }
+
+            navbar._collapseTimeout = setTimeout(() => {
                 if (!navbar.classList.contains('collapsed')) {
                     navbar.classList.add('collapsed');
                 }
-            }, 7000); // 10 seconds = 10000 ms
+            }, 7000); // 7 seconds
         }
-    });
+
+        // Initial collapse
+        scheduleAutoCollapse();
+
+        // Re-trigger timer every time navbar is opened
+        const observer = new MutationObserver(() => {
+            if (!navbar.classList.contains('collapsed')) {
+                scheduleAutoCollapse();
+            }
+        });
+
+        observer.observe(navbar, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    }
+});
 </script>
