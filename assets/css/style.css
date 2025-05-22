@@ -1,7 +1,8 @@
 body {
     background-color: #000;
     color: #fff;
-    font-family: 'Arial', sans-serif;
+/*    font-family: 'Arial', sans-serif; */
+    font-family: 'Trebuchet MS', sans-serif;
     text-align: center;
     justify-content: center;
     padding-top: 120px; /* leave space for fixed header */
@@ -21,11 +22,12 @@ body::-webkit-scrollbar {
     aspect-ratio: 1 / 1;
     background-color: black;
     border-radius: 10px;
+    justify-content: center;
 }
 
 .post {
     position: relative;
-    background-color: #1a1a1a;
+    background-color: #111111;
     padding: 20px;
     border-radius: 10px;
     text-align: left;
@@ -970,4 +972,25 @@ nav a:hover {
     font-size: 0.95em;
     text-align: center;
     font-weight: bold;
+}
+
+
+.post-media {
+    position: relative;
+    width: 100%;
+    padding-top: 125%; /* 1:1 aspect ratio (change to 125% for 4:5, etc.) */
+    overflow: hidden;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.post-media img,
+.post-media video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
 }

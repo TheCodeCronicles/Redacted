@@ -69,23 +69,24 @@ $result = $stmt->get_result();
                 <h3>@<?php echo htmlspecialchars($row['username']); ?></h3>
             </a>
             <p><?php echo nl2br(htmlspecialchars($row['content'])); ?></p>
-            
-            <?php if (!empty($row['image_path'])): ?>
-            <?php
-            $ext = strtolower(pathinfo($row['image_path'], PATHINFO_EXTENSION));
-            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', "webp"])):?>
+            <div class="post-media">
+                <?php if (!empty($row['image_path'])): ?>
+                <?php
+                $ext = strtolower(pathinfo($row['image_path'], PATHINFO_EXTENSION));
+                if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', "webp"])):?>
 
-                <img src="<?php echo htmlspecialchars($row['image_path']); ?>" alt="Post image" style="max-width: 100%; margin-top: 10px; border-radius: 10px;">
+                    <img src="<?php echo htmlspecialchars($row['image_path']); ?>" alt="Post image" style="max-width: 100%; margin-top: 10px; border-radius: 10px;">
 
-                <?php elseif (in_array($ext, ['mp4', 'webm', 'ogg'])): ?>
+                    <?php elseif (in_array($ext, ['mp4', 'webm', 'ogg'])): ?>
 
-                    <video class="click-toggle-mute" autoplay loop muted style="max-width: 100%; margin-top: 10px; border-radius: 10px;">
-                        <source src="<?php echo htmlspecialchars($row['image_path']); ?>" type="video/<?php echo $ext; ?>">
-                        Your browser does not support the video tag.
-                    </video>
+                        <video class="click-toggle-mute" autoplay loop muted style="max-width: 100%; margin-top: 10px; border-radius: 10px;">
+                            <source src="<?php echo htmlspecialchars($row['image_path']); ?>" type="video/<?php echo $ext; ?>">
+                            Your browser does not support the video tag.
+                        </video>
 
+                    <?php endif; ?>
                 <?php endif; ?>
-            <?php endif; ?>
+            </div>
             
             <div class="vote-container">
 
