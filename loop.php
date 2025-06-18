@@ -240,11 +240,20 @@ const videoObserver = new IntersectionObserver(entries => {
 
         // Check if the video is 90% visible
         if (entry.isIntersecting && entry.intersectionRatio >= 0.9) {
-            // Ensure the video fills the entire screen
-            video.play();  // Play the video when 90% is visible
-        } else {
-            video.pause();  // Pause video when less than 90% is visible
-        }
+    video.play();
+
+    // Snap to this video container if it's not already centered
+    const container = video.closest('.video-post');
+    if (container) {
+        container.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+
+} else {
+    video.pause();
+}
     });
 }, {
     threshold: 0.9  // Trigger when 90% of the video is visible
