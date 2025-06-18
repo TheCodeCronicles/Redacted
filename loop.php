@@ -176,6 +176,13 @@ $result = $stmt->get_result();
 <?php endwhile; ?>
 
 <script>
+    document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.reel-video').forEach(video => {
+        video.pause();
+        video.currentTime = 0; // Optional: reset to beginning if needed
+    });
+});
+
 function toggleCommentPanel(postId) {
     const panel = document.getElementById(`comment-panel-${postId}`);
     const allPanels = document.querySelectorAll('.comment-panel');
@@ -232,31 +239,79 @@ document.querySelectorAll('.feed-tab').forEach(tab => {
 });
 
 
-// Intersection Observer to control when videos play based on visibility
-const videoObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-        const video = entry.target;
-        const videoContainer = video.closest('.video-post'); // Assuming your video is wrapped in a .video-post container
+// // Intersection Observer to control when videos play based on visibility
+// const videoObserver = new IntersectionObserver(entries => {
+//     entries.forEach(entry => {
+//         const video = entry.target;
+//         const videoContainer = video.closest('.video-post'); // Assuming your video is wrapped in a .video-post container
 
-        // Check if the video is 90% visible
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.9) {
-    video.play();
+//         // Check if the video is 90% visible
+//         if (entry.isIntersecting && entry.intersectionRatio >= 0.9) {
+//     video.play();
 
-    // Snap to this video container if it's not already centered
-    const container = video.closest('.video-post');
-    if (container) {
-        container.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        });
-    }
+//     // Snap to this video container if it's not already centered
+//     const container = video.closest('.video-post');
+//     if (container) {
+//         container.scrollIntoView({
+//             behavior: 'smooth',
+//             block: 'start'
+//         });
+//     }
 
-} else {
-    video.pause();
-}
+// } else {
+//     video.pause();
+// }
+//     });
+// }, {
+//     threshold: 0.9  // Trigger when 90% of the video is visible
+// });
+
+let scrollTimeout;
+
+function handleScrollStop() {
+    const videos = document.querySelectorAll('.reel-video');
+    let mostVisibleVideo = null;
+    let maxRatio = 0;
+
+    videos.forEach(video => {
+        const rect = video.getBoundingClientRect();
+        const height = window.innerHeight;
+
+        const visibleHeight = Math.min(rect.bottom, height) - Math.max(rect.top, 0);
+        const ratio = visibleHeight / rect.height;
+
+        if (ratio > maxRatio) {
+            maxRatio = ratio;
+            mostVisibleVideo = video;
+        }
     });
-}, {
-    threshold: 0.9  // Trigger when 90% of the video is visible
+
+    if (mostVisibleVideo && maxRatio >= 0.5) {
+        const container = mostVisibleVideo.closest('.video-post');
+        if (container) {
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        videos.forEach(video => {
+            if (video === mostVisibleVideo) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        });
+    } else {
+        videos.forEach(video => video.pause());
+    }
+}
+
+// Debounced scroll handling
+window.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(handleScrollStop, 150);
+});
+
+window.addEventListener('load', () => {
+    handleScrollStop();
 });
 
 // Observe all videos on the page
