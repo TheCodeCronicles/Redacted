@@ -1,11 +1,20 @@
 <?php
-session_start();
 require_once 'db/db.php';
-if (!isset($_SESSION['user_id']) || !isset($_GET['u'])) exit;
+session_start();
+
+if (!isset($_GET['u'])) {
+    echo json_encode(['available' => false]);
+    exit;
+}
 
 $username = trim($_GET['u']);
-$stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
-$stmt->bind_param("s", $username);
+$userId = $_SESSION['user_id'] ?? 0;
+
+// Check if username exists but is not owned by current user
+$stmt = $conn->prepare("SELECT id FROM users WHERE username = ? AND id != ?");
+$stmt->bind_param("si", $username, $userId);
 $stmt->execute();
-$res = $stmt->get_result();
-echo json_encode(['available' => $res->num_rows === 0 || $res->fetch_assoc()['id'] == $_SESSION['user_id']]);
+$stmt->store_result();
+
+echo json_encode(['available' => $stmt->num_rows === 0]);
+?>

@@ -126,40 +126,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
 
   <!-- Username live-check JS -->
-  <script>
-  let typingTimer;
-  const unameInput = document.getElementById('username');
-  const feedback = document.getElementById('uname-msg');
-      
-  unameInput.addEventListener('input', function () {
-    clearTimeout(typingTimer);
-    const val = this.value.trim();
-    feedback.textContent = ''; // Clear existing
-  
-    if (!val.match(/^[a-zA-Z0-9_]{3,30}$/)) {
-      feedback.textContent = "3-30 chars, letters/numbers/_ only.";
-      feedback.classList.add('invalid');
-      feedback.classList.remove('valid');
-      return;
-    }
-  
-    typingTimer = setTimeout(() => {
-      fetch(`check_username.php?u=${encodeURIComponent(val)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.available) {
-            feedback.textContent = "✔ Available";
-            feedback.classList.add('valid');
-            feedback.classList.remove('invalid');
-          } else {
-            feedback.textContent = "✖ Taken";
-            feedback.classList.add('invalid');
-            feedback.classList.remove('valid');
-          }
-        });
-    }, 500);
-  });
-  </script>
+<script>
+let typingTimer;
+const unameInput = document.getElementById('username');
+const feedback = document.getElementById('uname-msg');
+const saveBtn = document.querySelector('.form-button');
+
+let isFormatValid = false;
+let isUsernameAvailable = true; // Assume true initially (current username)
+
+function validateForm() {
+  saveBtn.disabled = !(isFormatValid && isUsernameAvailable);
+}
+
+unameInput.addEventListener('input', function () {
+  clearTimeout(typingTimer);
+  const val = this.value.trim();
+
+  feedback.textContent = '';
+  feedback.classList.remove('valid', 'invalid');
+
+  // Format validation
+  if (!val.match(/^[a-zA-Z0-9_]{3,30}$/)) {
+    feedback.textContent = "3-30 chars, letters/numbers/_ only.";
+    feedback.classList.add('invalid');
+    isFormatValid = false;
+    isUsernameAvailable = false;
+    validateForm();
+    return;
+  }
+
+  isFormatValid = true;
+
+  typingTimer = setTimeout(() => {
+    fetch(`check_username.php?u=${encodeURIComponent(val)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.available) {
+          feedback.textContent = "✔ Available";
+          feedback.classList.add('valid');
+          feedback.classList.remove('invalid');
+          isUsernameAvailable = true;
+        } else {
+          feedback.textContent = "✖ Taken";
+          feedback.classList.add('invalid');
+          feedback.classList.remove('valid');
+          isUsernameAvailable = false;
+        }
+        validateForm();
+      })
+      .catch(() => {
+        feedback.textContent = "Error checking.";
+        feedback.classList.add('invalid');
+        isUsernameAvailable = false;
+        validateForm();
+      });
+  }, 500);
+});
+</script>
+
 
   <?php include 'settings.php'; ?>
 </body>
