@@ -176,11 +176,78 @@ $result = $stmt->get_result();
 <?php endwhile; ?>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
+let isMuted = false; // Global mute state
+
+document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.reel-video').forEach(video => {
         video.pause();
         video.currentTime = 0; // Optional: reset to beginning if needed
     });
+});
+
+
+function setMuteForAll(mute) {
+    document.querySelectorAll('.reel-video').forEach(v => {
+        v.muted = mute;
+    });
+}
+
+function handleScrollStop() {
+    const videos = document.querySelectorAll('.reel-video');
+    let mostVisibleVideo = null;
+    let maxRatio = 0;
+
+    videos.forEach(video => {
+        const rect = video.getBoundingClientRect();
+        const height = window.innerHeight;
+        const visibleHeight = Math.min(rect.bottom, height) - Math.max(rect.top, 0);
+        const ratio = visibleHeight / rect.height;
+
+        if (ratio > maxRatio) {
+            maxRatio = ratio;
+            mostVisibleVideo = video;
+        }
+    });
+
+    if (mostVisibleVideo && maxRatio >= 0.5) {
+        const container = mostVisibleVideo.closest('.video-post');
+        if (container) {
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        videos.forEach(video => {
+            video.pause();
+            video.muted = isMuted;
+        });
+
+        mostVisibleVideo.muted = isMuted;
+        mostVisibleVideo.play();
+    } else {
+        videos.forEach(video => video.pause());
+    }
+}
+
+let scrollTimeout;
+window.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(handleScrollStop, 150);
+});
+
+window.addEventListener('load', () => {
+    const videos = document.querySelectorAll('.reel-video');
+    videos.forEach((video, i) => {
+        video.muted = isMuted;
+    });
+    handleScrollStop();
+});
+
+// Click-to-toggle-mute functionality
+window.addEventListener('click', e => {
+    const clickedVideo = e.target.closest('video.reel-video');
+    if (clickedVideo) {
+        isMuted = !isMuted;
+        setMuteForAll(isMuted);
+    }
 });
 
 function toggleCommentPanel(postId) {
@@ -236,82 +303,6 @@ document.querySelectorAll('.feed-tab').forEach(tab => {
     tab.addEventListener('click', () => {
         resetCommentPanels();
     });
-});
-
-
-// // Intersection Observer to control when videos play based on visibility
-// const videoObserver = new IntersectionObserver(entries => {
-//     entries.forEach(entry => {
-//         const video = entry.target;
-//         const videoContainer = video.closest('.video-post'); // Assuming your video is wrapped in a .video-post container
-
-//         // Check if the video is 90% visible
-//         if (entry.isIntersecting && entry.intersectionRatio >= 0.9) {
-//     video.play();
-
-//     // Snap to this video container if it's not already centered
-//     const container = video.closest('.video-post');
-//     if (container) {
-//         container.scrollIntoView({
-//             behavior: 'smooth',
-//             block: 'start'
-//         });
-//     }
-
-// } else {
-//     video.pause();
-// }
-//     });
-// }, {
-//     threshold: 0.9  // Trigger when 90% of the video is visible
-// });
-
-let scrollTimeout;
-
-function handleScrollStop() {
-    const videos = document.querySelectorAll('.reel-video');
-    let mostVisibleVideo = null;
-    let maxRatio = 0;
-
-    videos.forEach(video => {
-        const rect = video.getBoundingClientRect();
-        const height = window.innerHeight;
-
-        const visibleHeight = Math.min(rect.bottom, height) - Math.max(rect.top, 0);
-        const ratio = visibleHeight / rect.height;
-
-        if (ratio > maxRatio) {
-            maxRatio = ratio;
-            mostVisibleVideo = video;
-        }
-    });
-
-    if (mostVisibleVideo && maxRatio >= 0.5) {
-        const container = mostVisibleVideo.closest('.video-post');
-        if (container) {
-            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        videos.forEach(video => {
-            if (video === mostVisibleVideo) {
-                video.play();
-            } else {
-                video.pause();
-            }
-        });
-    } else {
-        videos.forEach(video => video.pause());
-    }
-}
-
-// Debounced scroll handling
-window.addEventListener('scroll', () => {
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(handleScrollStop, 150);
-});
-
-window.addEventListener('load', () => {
-    handleScrollStop();
 });
 
 // Observe all videos on the page
@@ -432,18 +423,8 @@ function voteComment(commentId, vote) {
     })
     .catch(error => console.error("Voting error:", error));
 }
-
-
-// Toggle mute/unmute on video click
-document.querySelectorAll('video.reel-video').forEach(video => {
-    video.addEventListener('click', () => {
-        video.muted = !video.muted;
-    });
-});
-
 </script>
 
 <?php include 'settings.php'; ?>
-
 </body>
 </html>
