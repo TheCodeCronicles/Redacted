@@ -2,6 +2,12 @@
 session_start();
 require_once 'db/db.php';
 
+// If not logged in, kick to login
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
 if (!isset($_GET['user'])) {
     header("Location: feed.php");
     exit();
@@ -29,10 +35,22 @@ $follower_count = $conn->query("SELECT COUNT(*) FROM followers WHERE following_i
 $following_count = $conn->query("SELECT COUNT(*) FROM followers WHERE follower_id = {$user_data['id']}")->fetch_row()[0];
 
 // Fetch user posts
-$post_stmt = $conn->prepare("SELECT * FROM posts WHERE user_id = ? ORDER BY created_at DESC");
-$post_stmt->bind_param("i", $user_data['id']);
+// Fetch user posts with vote info
+$sql = "SELECT posts.*, users.username,
+    IFNULL(SUM(post_votes.vote), 0) AS votes,
+    (SELECT vote FROM post_votes WHERE post_id = posts.id AND user_id = ?) AS user_vote
+    FROM posts
+    LEFT JOIN users ON posts.user_id = users.id
+    LEFT JOIN post_votes ON posts.id = post_votes.post_id
+    WHERE posts.user_id = ?
+    GROUP BY posts.id
+    ORDER BY posts.created_at DESC";
+
+$post_stmt = $conn->prepare($sql);
+$post_stmt->bind_param("ii", $user_id, $user_data['id']);
 $post_stmt->execute();
 $posts = $post_stmt->get_result();
+
 
 $is_following = false;
 if (!$is_own_profile) {
@@ -108,7 +126,8 @@ if (!$is_own_profile) {
             <!-- Posts tab: show everything -->
             <div class="tab-content active" id="posts">
                 <div class="profile-grid">
-                    <?php foreach ($all_posts as $post): ?>
+                    <?php foreach ($all_posts as $index => $post): ?>
+                      <div class="grid-item" data-index="<?php echo $index; ?>">
                         <?php
                             $ext = strtolower(pathinfo($post['image_path'], PATHINFO_EXTENSION));
                             if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
@@ -118,6 +137,7 @@ if (!$is_own_profile) {
                                     <source src="<?php echo htmlspecialchars($post['image_path']); ?>" type="video/<?php echo $ext; ?>">
                                 </video>
                             <?php endif; ?>
+                      </div>
                     <?php endforeach; ?>
                 </div>
             </div>
@@ -165,6 +185,20 @@ if (!$is_own_profile) {
             <ul id="following-list" class="follow-user-list"></ul>
           </div>
         </div>
+
+        <!-- Post Display Modal -->
+        <div id="post-modal" class="post-modal hidden">
+          <span id="close-post" class="close-post">&times;</span>
+          <div class="post-content-wrapper">
+            <button id="prev-post">&larr;</button>
+            <div id="post-content">
+              <!-- JS will populate this -->
+            </div>
+            <button id="next-post">&rarr;</button>
+          </div>
+        </div>
+
+
 
     </div>
 
@@ -252,6 +286,145 @@ document.querySelectorAll('.close-modal').forEach(btn => {
     btn.closest('.follow-modal').classList.add('hidden');
   });
 });
+
+// Handle Post Display Modal
+const allPosts = <?php echo json_encode($all_posts); ?>;
+let currentIndex = 0;
+
+const modal = document.getElementById('post-modal');
+const postContent = document.getElementById('post-content');
+const closeBtn = document.getElementById('close-post');
+const nextBtn = document.getElementById('next-post');
+const prevBtn = document.getElementById('prev-post');
+
+function renderPost(index, direction = 'fade') {
+  const post = allPosts[index];
+  if (!post) return;
+
+  const ext = post.image_path.split('.').pop().toLowerCase();
+  const isImage = ext.match(/(jpg|jpeg|png|gif|webp)/);
+
+  postContent.innerHTML = '';
+  postContent.style.animation = 'none';
+  void postContent.offsetWidth;
+
+  if (direction === 'left') {
+    postContent.style.animation = 'slideLeft 0.3s ease';
+  } else if (direction === 'right') {
+    postContent.style.animation = 'slideRight 0.3s ease';
+  } else {
+    postContent.style.animation = 'fadeIn 0.3s ease';
+  }
+
+  const media = document.createElement(isImage ? 'img' : 'video');
+  media.src = post.image_path;
+  if (!isImage) {
+    media.controls = true;
+    media.autoplay = true;
+    media.loop = true;
+    media.muted = true;
+    media.playsInline = true;
+  }
+  media.style.maxWidth = '100%';
+  media.style.maxHeight = '60vh';
+  media.style.objectFit = 'contain';
+  media.style.borderRadius = '10px';
+  media.style.display = 'block';
+  media.style.margin = '0 auto';
+
+  const infoDiv = document.createElement('div');
+  infoDiv.classList.add('post-info');
+  infoDiv.style.textAlign = 'left';
+  infoDiv.style.marginTop = '15px';
+  infoDiv.innerHTML = `
+    <a href="profile.php?user=${encodeURIComponent(post.username)}" class="post-username" style="font-weight: bold; color: white; text-decoration: none;">
+      @${post.username}
+    </a>
+    <p class="post-caption" style="color: #ccc; margin-top: 5px;">${post.content ?? ''}</p>
+    <small style="color: gray;">${post.created_at}</small>
+  `;
+
+  // Select icons
+  const upIcon = post.user_vote == 1 ? 'assets/images/upVote-arrow.png' : 'assets/images/up-arrow.png';
+  const downIcon = post.user_vote == -1 ? 'assets/images/downVote-arrow.png' : 'assets/images/down-arrow.png';
+
+  const voteDiv = document.createElement('div');
+  voteDiv.classList.add('vote-comment-bar');
+  voteDiv.style.display = 'flex';
+  voteDiv.style.alignItems = 'center';
+  voteDiv.style.gap = '12px';
+  voteDiv.style.marginTop = '10px';
+  voteDiv.style.justifyContent = 'center';
+
+  voteDiv.innerHTML = `
+    <button class="vote" onclick="vote(${post.id}, 1)">
+      <img src="${upIcon}" alt="Upvote" width="24" height="24">
+    </button>
+    <span class="vote-count" id="votes-${post.id}" style="color:white;">${post.votes}</span>
+    <button class="vote" onclick="vote(${post.id}, -1)">
+      <img src="${downIcon}" alt="Downvote" width="24" height="24">
+    </button>
+    <a href="post.php?id=${post.id}" class="comment-btn" style="margin-left: 15px;">
+      <img src="assets/images/comment.png" alt="Comment" width="24" height="24">
+    </a>
+  `;
+
+  preloadAdjacent(index);
+
+  postContent.appendChild(media);
+  postContent.appendChild(infoDiv);
+  postContent.appendChild(voteDiv);
+}
+
+
+
+// Handle opening post modal
+document.querySelectorAll('.grid-item').forEach(item => {
+  item.addEventListener('click', () => {
+    currentIndex = parseInt(item.getAttribute('data-index'));
+    renderPost(currentIndex);
+    modal.classList.remove('hidden');
+  });
+});
+
+closeBtn.addEventListener('click', () => {
+  modal.classList.add('hidden');
+  postContent.innerHTML = '';
+});
+
+nextBtn.addEventListener('click', () => {
+  if (currentIndex < allPosts.length - 1) {
+    currentIndex++;
+    renderPost(currentIndex, 'left');
+  }
+});
+
+prevBtn.addEventListener('click', () => {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderPost(currentIndex, 'right');
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (!modal.classList.contains('hidden')) {
+    if (e.key === 'ArrowRight') nextBtn.click();
+    if (e.key === 'ArrowLeft') prevBtn.click();
+    if (e.key === 'Escape') closeBtn.click();
+  }
+});
+
+
+function preloadAdjacent(index) {
+  [index - 1, index + 1].forEach(i => {
+    if (allPosts[i]) {
+      const ext = allPosts[i].image_path.split('.').pop().toLowerCase();
+      const el = document.createElement(ext.match(/(jpg|jpeg|png|gif|webp)/) ? 'img' : 'video');
+      el.src = allPosts[i].image_path;
+    }
+  });
+}
+
 
 </script>
 
