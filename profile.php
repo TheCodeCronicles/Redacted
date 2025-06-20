@@ -133,7 +133,7 @@ if (!$is_own_profile) {
                             if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
                                 <img src="<?php echo htmlspecialchars($post['image_path']); ?>" alt="">
                             <?php elseif (in_array($ext, ['mp4', 'webm', 'ogg'])): ?>
-                                <video autoplay loop muted>
+                                <video autoplay loop muted class="click-toggle-mute">
                                     <source src="<?php echo htmlspecialchars($post['image_path']); ?>" type="video/<?php echo $ext; ?>">
                                 </video>
                             <?php endif; ?>
@@ -151,7 +151,7 @@ if (!$is_own_profile) {
                         $ext = strtolower(pathinfo($post['image_path'], PATHINFO_EXTENSION));
                         if (in_array($ext, ['mp4', 'webm', 'ogg'])):
                             $has_reels = true; ?>
-                            <video autoplay loop muted>
+                            <video autoplay loop muted class="click-toggle-mute">
                                 <source src="<?php echo htmlspecialchars($post['image_path']); ?>" type="video/<?php echo $ext; ?>">
                             </video>
                         <?php endif;
@@ -445,7 +445,6 @@ function preloadAdjacent(index) {
   });
 }
 
-
 </script>
 
 <?php include 'settings.php'; ?>
@@ -639,15 +638,6 @@ function voteComment(commentId, vote) {
     })
     .catch(error => console.error("Voting error:", error));
 }
-
-
-// Toggle mute/unmute on video click
-document.querySelectorAll('video.reel-video').forEach(video => {
-    video.addEventListener('click', () => {
-        video.muted = !video.muted;
-    });
-});
-
 
 </script>
 </body>

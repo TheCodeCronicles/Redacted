@@ -203,6 +203,8 @@ $result = $stmt->get_result();
 </div>
 
 <script>
+let isMuted = true; // Global mute state, start muted
+
 function vote(postId, vote) {
     const formData = new FormData();
     formData.append('post_id', postId);
@@ -383,34 +385,38 @@ window.addEventListener('scroll', () => {
     lastScroll = currentScroll;
 });
 
-// Toggle mute/unmute on video click
-document.querySelectorAll('video.click-toggle-mute').forEach(video => {
-    video.addEventListener('click', () => {
-        video.muted = !video.muted;
-    });
-});
-
+// mute/unmute
 document.addEventListener("DOMContentLoaded", function () {
     const videos = document.querySelectorAll('video.click-toggle-mute');
 
+    // Initial mute state for all videos
+    videos.forEach(video => {
+        video.muted = isMuted;
+    });
+
+    // Handle visibility and playback
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             const video = entry.target;
             if (entry.isIntersecting) {
-                // Play the video (don't unmute)
+                video.muted = isMuted;
                 video.play().catch(e => {}); 
             } else {
-                // Pause and mute the video when out of view
                 video.pause();
-                video.muted = true;
             }
         });
     }, {
-        threshold: 0.25 // At least 25% of the video must be visible
+        threshold: 0.4 // At least 40% visible
     });
 
     videos.forEach(video => {
         observer.observe(video);
+
+        // Global mute toggle on click
+        video.addEventListener('click', () => {
+            isMuted = !isMuted;
+            videos.forEach(v => v.muted = isMuted);
+        });
     });
 });
 
