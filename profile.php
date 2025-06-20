@@ -327,10 +327,10 @@ function renderPost(index, direction = 'fade') {
   const media = document.createElement(isImage ? 'img' : 'video');
   media.src = post.image_path;
   if (!isImage) {
-    media.controls = true;
+    media.controls = false;
     media.autoplay = true;
     media.loop = true;
-    media.muted = true;
+    media.muted = false;
   }
   media.classList.add('reel-video');
 
