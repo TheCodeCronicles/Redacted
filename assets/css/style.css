@@ -52,6 +52,13 @@ input {
     padding-right: 20%;
 }
 
+.userforms-edit {
+    top: 10vh;
+    padding-top: 0;
+    padding-left: 20%;
+    padding-right: 20%;
+}
+
 .btn {
     background-color: #1138cc;
     color: #fff;
@@ -1094,3 +1101,12 @@ nav a:hover {
   to { opacity: 1; }
 }
 
+
+.profile-preview {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+}
