@@ -304,10 +304,12 @@ function renderPost(index, direction = 'fade') {
   const ext = post.image_path.split('.').pop().toLowerCase();
   const isImage = ext.match(/(jpg|jpeg|png|gif|webp)/);
 
+  // Clear and reset animation
   postContent.innerHTML = '';
   postContent.style.animation = 'none';
   void postContent.offsetWidth;
 
+  // Animation direction
   if (direction === 'left') {
     postContent.style.animation = 'slideLeft 0.3s ease';
   } else if (direction === 'right') {
@@ -316,6 +318,12 @@ function renderPost(index, direction = 'fade') {
     postContent.style.animation = 'fadeIn 0.3s ease';
   }
 
+  const reelFrame = document.createElement('div');
+  reelFrame.classList.add('reel-frame');
+  reelFrame.dataset.postId = post.id;
+  reelFrame.id = `post-${post.id}`;
+
+  // Create media element
   const media = document.createElement(isImage ? 'img' : 'video');
   media.src = post.image_path;
   if (!isImage) {
@@ -323,58 +331,70 @@ function renderPost(index, direction = 'fade') {
     media.autoplay = true;
     media.loop = true;
     media.muted = true;
-    media.playsInline = true;
   }
-  media.style.maxWidth = '100%';
-  media.style.maxHeight = '60vh';
-  media.style.objectFit = 'contain';
-  media.style.borderRadius = '10px';
-  media.style.display = 'block';
-  media.style.margin = '0 auto';
+  media.classList.add('reel-video');
 
-  const infoDiv = document.createElement('div');
-  infoDiv.classList.add('post-info');
-  infoDiv.style.textAlign = 'left';
-  infoDiv.style.marginTop = '15px';
-  infoDiv.innerHTML = `
-    <a href="profile.php?user=${encodeURIComponent(post.username)}" class="post-username" style="font-weight: bold; color: white; text-decoration: none;">
-      @${post.username}
+  // Overlay (username + caption)
+  const overlay = document.createElement('div');
+  overlay.classList.add('overlay');
+  overlay.innerHTML = `
+    <a href="profile.php?user=${encodeURIComponent(post.username)}">
+      <h3>@${post.username}</h3>
     </a>
-    <p class="post-caption" style="color: #ccc; margin-top: 5px;">${post.content ?? ''}</p>
-    <small style="color: gray;">${post.created_at}</small>
+    <p>${post.content ? post.content.replace(/\n/g, '<br>') : ''}</p>
+    <small>${post.created_at}</small>
   `;
 
-  // Select icons
+  // Voting icons
   const upIcon = post.user_vote == 1 ? 'assets/images/upVote-arrow.png' : 'assets/images/up-arrow.png';
   const downIcon = post.user_vote == -1 ? 'assets/images/downVote-arrow.png' : 'assets/images/down-arrow.png';
 
-  const voteDiv = document.createElement('div');
-  voteDiv.classList.add('vote-comment-bar');
-  voteDiv.style.display = 'flex';
-  voteDiv.style.alignItems = 'center';
-  voteDiv.style.gap = '12px';
-  voteDiv.style.marginTop = '10px';
-  voteDiv.style.justifyContent = 'center';
-
-  voteDiv.innerHTML = `
+  const voteContainer = document.createElement('div');
+  voteContainer.classList.add('vote-container-loop');
+  voteContainer.innerHTML = `
     <button class="vote" onclick="vote(${post.id}, 1)">
       <img src="${upIcon}" alt="Upvote" width="24" height="24">
     </button>
-    <span class="vote-count" id="votes-${post.id}" style="color:white;">${post.votes}</span>
+
+    <span class="vote-count" id="votes-${post.id}" width="24" height="24">${post.votes}</span>
+
     <button class="vote" onclick="vote(${post.id}, -1)">
       <img src="${downIcon}" alt="Downvote" width="24" height="24">
     </button>
-    <a href="post.php?id=${post.id}" class="comment-btn" style="margin-left: 15px;">
+
+    <button class="vote" onclick="toggleCommentPanel(${post.id})">
       <img src="assets/images/comment.png" alt="Comment" width="24" height="24">
-    </a>
+    </button>
   `;
 
-  preloadAdjacent(index);
+  // Comment panel wrapper (can be loaded later)
+  const commentPanel = document.createElement('div');
+  commentPanel.className = 'comment-panel';
+  commentPanel.id = `comment-panel-${post.id}`;
+  commentPanel.innerHTML = `
+    <h4>Comments:</h4>
 
-  postContent.appendChild(media);
-  postContent.appendChild(infoDiv);
-  postContent.appendChild(voteDiv);
+    <button class="close-btn" onclick="closeCommentPanel(${post.id})">X</button>
+
+    <div id="comment-list-${post.id}" class="comment-list"></div>
+    
+    <form class="comment-input" onsubmit="submitComment(event, ${post.id})">
+      <input type="text" name="content" placeholder="Write a comment..." required>
+      <button type="submit">Post Comment</button>
+    </form>
+  `;
+
+  // Append everything
+  reelFrame.appendChild(media);
+  reelFrame.appendChild(overlay);
+  reelFrame.appendChild(voteContainer);
+  reelFrame.appendChild(commentPanel);
+
+  postContent.appendChild(reelFrame);
+
+  loadComments(post.id); // Load comments when modal opens
 }
+
 
 
 
@@ -430,5 +450,205 @@ function preloadAdjacent(index) {
 
 <?php include 'settings.php'; ?>
 
+<script>
+
+    document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.reel-video').forEach(video => {
+        video.pause();
+        video.currentTime = 0; // Optional: reset to beginning if needed
+    });
+});
+
+function toggleCommentPanel(postId) {
+    const panel = document.getElementById(`comment-panel-${postId}`);
+    const allPanels = document.querySelectorAll('.comment-panel');
+
+    const isVisible = panel.classList.contains('show');
+
+    // Hide all panels first
+    allPanels.forEach(p => p.classList.remove('show'));
+
+    if (!isVisible) {
+        panel.classList.add('show');
+        document.body.style.overflow = 'hidden'; // Lock scroll
+    } else {
+        document.body.style.overflow = 'auto'; // Unlock scroll
+    }
+}
+
+function closeCommentPanel(postId) {
+    const panel = document.getElementById(`comment-panel-${postId}`);
+    panel.classList.remove('show');
+    document.body.style.overflow = 'auto';
+}
+
+// Function to reset all comment panels to their closed state (with class toggle)
+function resetCommentPanels() {
+    const allPanels = document.querySelectorAll('.comment-panel');
+    allPanels.forEach(panel => {
+        panel.classList.remove('show'); // Remove the animation class
+    });
+    document.body.style.overflow = 'scroll'; // Re-enable scrolling on the body
+}
+
+// Ensure comment panels are reset and closed when page loads
+window.addEventListener('load', () => {
+    resetCommentPanels();
+});
+
+// Close all open comment panels when switching tabs or navigating between pages
+window.addEventListener('popstate', () => {
+    resetCommentPanels();
+});
+
+// Example: Reset the comment panels when switching between feed and loop tabs
+document.querySelectorAll('.loop-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        resetCommentPanels();
+    });
+});
+
+document.querySelectorAll('.feed-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        resetCommentPanels();
+    });
+});
+
+// Observe all videos on the page
+document.querySelectorAll('video.reel-video').forEach(video => {
+    videoObserver.observe(video);
+});
+
+function vote(postId, vote) {
+  const formData = new FormData();
+  formData.append('post_id', postId);
+  formData.append('vote', vote);
+
+  fetch('vote.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'success') {
+      // Update vote count
+      const voteCountElem = document.getElementById(`votes-${postId}`);
+      if (voteCountElem) voteCountElem.textContent = data.vote_count;
+
+      const container = document.querySelector(`[data-post-id="${postId}"]`) || document.getElementById(`post-${postId}`);
+      if (!container) return;
+
+      const upImg = container.querySelector('button.vote:nth-of-type(1) img');
+      const downImg = container.querySelector('button.vote:nth-of-type(2) img');
+
+      if (data.user_vote == 1) {
+        if (upImg) upImg.src = "assets/images/upVote-arrow.png";
+        if (downImg) downImg.src = "assets/images/down-arrow.png";
+      } else if (data.user_vote == -1) {
+        if (upImg) upImg.src = "assets/images/up-arrow.png";
+        if (downImg) downImg.src = "assets/images/downVote-arrow.png";
+      } else {
+        if (upImg) upImg.src = "assets/images/up-arrow.png";
+        if (downImg) downImg.src = "assets/images/down-arrow.png";
+      }
+
+      // Optional: update cached post in allPosts
+      const postIndex = allPosts.findIndex(p => p.id == postId);
+      if (postIndex !== -1) {
+        allPosts[postIndex].votes = data.vote_count;
+        allPosts[postIndex].user_vote = data.user_vote;
+      }
+    } else {
+      alert(data.message || "Error voting.");
+    }
+  })
+  .catch(err => console.error('Vote error:', err));
+}
+
+
+
+function submitComment(event, postId) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    formData.append('post_id', postId);
+
+    fetch('comment.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(result => {
+        if (result === 'success') {
+            form.reset(); // Clear the form input
+            loadComments(postId); // Reload comments dynamically
+        } else {
+            alert("Failed to post comment.");
+        }
+    })
+    .catch(error => console.error("Error submitting comment:", error));
+}
+
+
+function loadComments(postId) {
+    fetch(`comment.php?post_id=${postId}`)
+    .then(response => response.text())
+    .then(html => {
+        document.getElementById(`comment-list-${postId}`).innerHTML = html;
+    })
+    .catch(error => console.error("Failed to load comments:", error));
+}
+
+
+function voteComment(commentId, vote) {
+    const formData = new FormData();
+    formData.append('comment_id', commentId);
+    formData.append('vote', vote);
+
+    fetch('comment_vote.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Update vote count
+            const comment = document.querySelector(`[data-comment-id="${commentId}"]`);
+            if (comment) {
+                const voteCount = comment.querySelector('.vote-count');
+                const upButton = comment.querySelector('.vote-up img');
+                const downButton = comment.querySelector('.vote-down img');
+
+                voteCount.textContent = data.vote_count;
+
+                // Update icons based on new vote
+                if (data.user_vote == 1) {
+                    upButton.src = "assets/images/upVote-arrow.png";
+                    downButton.src = "assets/images/down-arrow.png";
+                } else if (data.user_vote == -1) {
+                    upButton.src = "assets/images/up-arrow.png";
+                    downButton.src = "assets/images/downVote-arrow.png";
+                } else {
+                    upButton.src = "assets/images/up-arrow.png";
+                    downButton.src = "assets/images/down-arrow.png";
+                }
+            }
+        } else {
+            alert(data.message || "Voting failed.");
+        }
+    })
+    .catch(error => console.error("Voting error:", error));
+}
+
+
+// Toggle mute/unmute on video click
+document.querySelectorAll('video.reel-video').forEach(video => {
+    video.addEventListener('click', () => {
+        video.muted = !video.muted;
+    });
+});
+
+
+</script>
 </body>
 </html>
