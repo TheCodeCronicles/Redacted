@@ -147,15 +147,17 @@ if (!$is_own_profile) {
                 <div class="profile-grid">
                     <?php
                     $has_reels = false;
-                    foreach ($all_posts as $post):
-                        $ext = strtolower(pathinfo($post['image_path'], PATHINFO_EXTENSION));
+                    foreach ($all_posts as $index => $post): ?>
+                      <div class="grid-item" data-index="<?php echo $index; ?>">
+                       <?php $ext = strtolower(pathinfo($post['image_path'], PATHINFO_EXTENSION));
                         if (in_array($ext, ['mp4', 'webm', 'ogg'])):
                             $has_reels = true; ?>
                             <video autoplay loop muted class="click-toggle-mute">
                                 <source src="<?php echo htmlspecialchars($post['image_path']); ?>" type="video/<?php echo $ext; ?>">
                             </video>
-                        <?php endif;
-                    endforeach;
+                        <?php endif; ?>
+                        </div>
+                   <?php endforeach;
                     if (!$has_reels): ?>
                         <p>No redacts yet.</p>
                     <?php endif; ?>
