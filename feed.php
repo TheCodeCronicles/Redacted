@@ -29,7 +29,7 @@ $sort = $_GET['sort'] ?? 'new';
 $orderBy = ($sort === 'hot') ? 'votes DESC, posts.created_at DESC' : 'posts.created_at DESC';
 
 $sql = "
-SELECT posts.*, users.username,
+SELECT posts.*, users.username, users.profile_pic,
     IFNULL(SUM(post_votes.vote), 0) AS votes,
     (SELECT vote FROM post_votes WHERE post_id = posts.id AND user_id = ?) AS user_vote
 FROM posts
@@ -95,23 +95,23 @@ while ($row = $topics_result->fetch_assoc()) {
         </a>
     </div>
 
-<?php if ($result->num_rows === 0): ?>
-    <div class="post" style="text-align: center; padding: 50px 20px; color: #777;">
-        <?php if (!$hasMyPosts && !$followsOthers): ?>
-            <h2>Welcome to your feed!</h2>
-            <p>Your feed is empty. Try posting something or follow some users to get started.</p>
-        <?php elseif (!$hasMyPosts): ?>
-            <h2>Your feed is empty</h2>
-            <p>You haven't posted anything yet. Tap the post button to start sharing.</p>
-        <?php elseif (!$followsOthers): ?>
-            <h2>Your feed is quiet</h2>
-            <p>Follow some users to see their posts here.</p>
-        <?php else: ?>
-            <h2>Your feed is empty</h2>
-            <p>No posts found for your feed at this time.</p>
-        <?php endif; ?>
-    </div>
-<?php endif; ?>
+    <?php if ($result->num_rows === 0): ?>
+        <div class="post" style="text-align: center; padding: 50px 20px; color: #777;">
+            <?php if (!$hasMyPosts && !$followsOthers): ?>
+                <h2>Welcome to your feed!</h2>
+                <p>Your feed is empty. Try posting something or follow some users to get started.</p>
+            <?php elseif (!$hasMyPosts): ?>
+                <h2>Your feed is empty</h2>
+                <p>You haven't posted anything yet. Tap the post button to start sharing.</p>
+            <?php elseif (!$followsOthers): ?>
+                <h2>Your feed is quiet</h2>
+                <p>Follow some users to see their posts here.</p>
+            <?php else: ?>
+                <h2>Your feed is empty</h2>
+                <p>No posts found for your feed at this time.</p>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
 
     <?php while ($row = $result->fetch_assoc()): ?>
         <div class="post" data-post-id="<?php echo $row['id']; ?>" id="post-<?php echo $row['id']; ?>">
@@ -131,9 +131,12 @@ while ($row = $topics_result->fetch_assoc()) {
             }?>
 
             <div class="post-frame">
-            <a href="profile.php?user=<?php echo urlencode($row['username']); ?>">
+            <a href="profile.php?user=<?php echo urlencode($row['username']); ?>" class="post-author">
+                <img src="<?php echo htmlspecialchars($row['profile_pic'] ?: 'assets/images/default-profile.png'); ?>" alt="Profile Picture"
+                     class="profile-thumb">
                 <h3>@<?php echo htmlspecialchars($row['username']); ?></h3>
             </a>
+
             <p><?php echo nl2br(htmlspecialchars($row['content'])); ?></p>
             <div class="post-tags">
                 <?php foreach ($topics as $tag): ?>

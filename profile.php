@@ -36,7 +36,7 @@ $following_count = $conn->query("SELECT COUNT(*) FROM followers WHERE follower_i
 
 // Fetch user posts
 // Fetch user posts with vote info
-$sql = "SELECT posts.*, users.username,
+$sql = "SELECT posts.*, users.username, users.profile_pic,
     IFNULL(SUM(post_votes.vote), 0) AS votes,
     (SELECT vote FROM post_votes WHERE post_id = posts.id AND user_id = ?) AS user_vote
     FROM posts
@@ -112,6 +112,7 @@ if (!$is_own_profile) {
             $all_posts = [];
             while ($post = $posts->fetch_assoc()) {
                 // Fetch topics for this post
+                $post['profile_pic'] = $user_data['profile_pic'];
                 $topic_stmt = $conn->prepare("SELECT t.name FROM post_topics pt JOIN topics t ON pt.topic_id = t.id WHERE pt.post_id = ?");
                 $topic_stmt->bind_param("i", $post['id']);
                 $topic_stmt->execute();
@@ -363,16 +364,18 @@ function renderPost(index, direction = 'fade') {
     return `<a class="post-tag" href="topic.php?name=${encodeURIComponent(clean)}">${t}</a>`;
   }).join(' ');
 
-
   overlay.innerHTML = `
-    <a href="profile.php?user=${encodeURIComponent(post.username)}">
-      <h3>@${post.username}</h3>
-    </a>
+    <div class="user-header">
+      <a href="profile.php?user=${encodeURIComponent(post.username)}" class="post-author">
+        <img src="${post.profile_pic}" alt="@${post.username}" class="profile-thumb">
+        <strong>@${post.username}</strong>
+      </a>
+    </div>
     <p>${post.content ? post.content.replace(/\n/g, '<br>') : ''}</p>
     <div class="tag-row">${tags}</div><br>
     <small>${post.created_at}</small>
   `;
-
+  
 
   // Voting icons
   const upIcon = post.user_vote == 1 ? 'assets/images/upVote-arrow.png' : 'assets/images/up-arrow.png';

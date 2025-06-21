@@ -79,7 +79,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true' && isset($_GET['query'])) {
         }
 
         .search-results li a {
-            color: lightblue;
+            color: #ffffff;
             text-decoration: none;
         }
 
@@ -138,20 +138,20 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true' && isset($_GET['query'])) {
         }
 
         .tag-pill {
-    display: inline-block;
-    background-color: #333;
-    color: #fff;
-    padding: 4px 10px;
-    margin: 3px 0;
-    border-radius: 15px;
-    text-decoration: none;
-    font-size: 0.9em;
-    transition: background-color 0.2s ease;
-}
+            display: inline-block;
+            background-color: #333;
+            color: #fff;
+            padding: 4px 10px;
+            margin: 3px 0;
+            border-radius: 15px;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: background-color 0.2s ease;
+        }
 
-.tag-pill:hover {
-    background-color: #555;
-}
+        .tag-pill:hover {
+            background-color: #555;
+        }
 
     </style>
 </head>

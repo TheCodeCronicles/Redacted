@@ -4,6 +4,20 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 $currentPage = basename($_SERVER['PHP_SELF']);
 $loggedInUsername = isset($_SESSION['username']) ? $_SESSION['username'] : null;
+
+$profilePic = 'assets/images/default.png'; // fallback
+
+if ($loggedInUsername) {
+    require_once 'db/db.php';
+    $stmt = $conn->prepare("SELECT profile_pic FROM users WHERE username = ?");
+    $stmt->bind_param("s", $loggedInUsername);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        $profilePic = $row['profile_pic'] ?: $profilePic;
+    }
+}
+
 ?>
 
 <style>
@@ -125,7 +139,7 @@ $loggedInUsername = isset($_SESSION['username']) ? $_SESSION['username'] : null;
     <?php if ($username): ?>
         <a href="profile.php?user=<?= urlencode($loggedInUsername) ?>" 
             class="<?= ($currentPage == 'profile.php' && isset($_GET['user']) && $_GET['user'] === $loggedInUsername) ? 'active' : '' ?>">
-            <img src="assets/images/default.png" alt="Profile Icon">
+            <img src="<?= htmlspecialchars($profilePic) ?>" alt="Profile Icon" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
             My Profile
         </a>
     <?php endif; ?>

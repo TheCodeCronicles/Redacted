@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 // Fetch only video posts
-$sql = "SELECT posts.*, users.username, 
+$sql = "SELECT posts.*, users.username, users.profile_pic,
     IFNULL(SUM(post_votes.vote), 0) AS votes,
     (SELECT vote FROM post_votes WHERE post_id = posts.id AND user_id = ?) AS user_vote
     FROM posts
@@ -57,9 +57,12 @@ $result = $stmt->get_result();
             </video>
 
             <div class="overlay">
-                <a href="profile.php?user=<?php echo urlencode($row['username']); ?>">
-                    <h3>@<?php echo htmlspecialchars($row['username']); ?></h3>
-                </a>
+            <a href="profile.php?user=<?php echo urlencode($row['username']); ?>" class="post-author">
+                <img src="<?php echo htmlspecialchars($row['profile_pic'] ?: 'assets/images/default-profile.png'); ?>" alt="Profile Picture"
+                     class="profile-thumb">
+                <h3>@<?php echo htmlspecialchars($row['username']); ?></h3>
+            </a>
+
                 <p><?php echo nl2br(htmlspecialchars($row['content'])); ?></p>
 
                 <?php $topic_stmt = $conn->prepare("

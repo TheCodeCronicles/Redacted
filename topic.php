@@ -79,6 +79,15 @@ $posts = $post_stmt->get_result();
                     $tags[] = '#' . htmlspecialchars($tag['name']);
                 }
                 $post['tags'] = $tags;
+
+                // Fetch user's profile picture
+                $pic_stmt = $conn->prepare("SELECT profile_pic FROM users WHERE username = ?");
+                $pic_stmt->bind_param("s", $post['username']);
+                $pic_stmt->execute();
+                $pic_result = $pic_stmt->get_result();
+                if ($pic_row = $pic_result->fetch_assoc()) {
+                    $post['profile_pic'] = $pic_row['profile_pic'];
+                }
               
                 $all_posts[] = $post;
             }
@@ -304,13 +313,17 @@ function renderPost(index, direction = 'fade') {
 
 
   overlay.innerHTML = `
-    <a href="profile.php?user=${encodeURIComponent(post.username)}">
-      <h3>@${post.username}</h3>
-    </a>
+    <div class="user-header">
+      <a href="profile.php?user=${encodeURIComponent(post.username)}" class="post-author">
+        <img src="${post.profile_pic}" alt="@${post.username}" class="profile-thumb">
+        <strong>@${post.username}</strong>
+      </a>
+    </div>
     <p>${post.content ? post.content.replace(/\n/g, '<br>') : ''}</p>
     <div class="tag-row">${tags}</div><br>
     <small>${post.created_at}</small>
   `;
+
 
 
   // Voting icons
