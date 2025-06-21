@@ -126,13 +126,16 @@ if (!$is_own_profile) {
             <!-- Posts tab: show everything -->
             <div class="tab-content active" id="posts">
                 <div class="profile-grid">
-                    <?php foreach ($all_posts as $index => $post): ?>
+                    <?php $has_posts = false;
+                    foreach ($all_posts as $index => $post): ?>
                       <div class="grid-item" data-index="<?php echo $index; ?>">
                         <?php
                             $ext = strtolower(pathinfo($post['image_path'], PATHINFO_EXTENSION));
-                            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
+                            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): 
+                                $has_posts = true;?>
                                 <img src="<?php echo htmlspecialchars($post['image_path']); ?>" alt="">
-                            <?php elseif (in_array($ext, ['mp4', 'webm', 'ogg'])): ?>
+                            <?php elseif (in_array($ext, ['mp4', 'webm', 'ogg'])): 
+                              $has_posts = true;?>
                                 <video autoplay loop muted class="click-toggle-mute">
                                     <source src="<?php echo htmlspecialchars($post['image_path']); ?>" type="video/<?php echo $ext; ?>">
                                 </video>
@@ -140,6 +143,9 @@ if (!$is_own_profile) {
                       </div>
                     <?php endforeach; ?>
                 </div>
+                <?php if (!$has_posts): ?>
+                        <p>No posts yet.</p>
+                <?php endif; ?>
             </div>
                             
             <!-- Redacts tab: show videos only -->
@@ -157,11 +163,11 @@ if (!$is_own_profile) {
                             </video>
                         <?php endif; ?>
                         </div>
-                   <?php endforeach;
-                    if (!$has_reels): ?>
-                        <p>No redacts yet.</p>
-                    <?php endif; ?>
+                    <?php endforeach; ?>
                 </div>
+                <?php if (!$has_reels): ?>
+                        <p>No redacts yet.</p>
+                <?php endif; ?>
             </div>
                     
             <!-- Tagged tab -->
