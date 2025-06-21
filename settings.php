@@ -23,6 +23,15 @@ if (session_status() === PHP_SESSION_NONE) {
     <form action="delete_account.php" method="POST" onsubmit="return confirm('Are you sure you want to delete your account? This cannot be undone.');">
         <button type="submit" class="danger">Delete Account</button>
     </form>
+
+    <!-- Logout button -->
+    <div style="margin-top: 1em;">
+        <a href="logout.php" title="Logout">
+            <img src="assets/images/logout-icon.png" alt="Logout" height="30" style="vertical-align: middle;">
+            <span style="margin-left: 0.5em; vertical-align: middle;">Logout</span>
+        </a>
+    </div>
+</div>
 </div>
 
 <script>
