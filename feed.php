@@ -10,22 +10,41 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
+// Check if user has posts
+$myPosts = $conn->prepare("SELECT COUNT(*) AS count FROM posts WHERE user_id = ?");
+$myPosts->bind_param("i", $user_id);
+$myPosts->execute();
+$myPostsResult = $myPosts->get_result()->fetch_assoc();
+$hasMyPosts = $myPostsResult['count'] > 0;
+
+// Check if user follows others
+$myFollows = $conn->prepare("SELECT COUNT(*) AS count FROM followers WHERE follower_id = ?");
+$myFollows->bind_param("i", $user_id);
+$myFollows->execute();
+$myFollowsResult = $myFollows->get_result()->fetch_assoc();
+$followsOthers = $myFollowsResult['count'] > 0;
+
 // Fetch latest posts with user vote
 $sort = $_GET['sort'] ?? 'new';
 $orderBy = ($sort === 'hot') ? 'votes DESC, posts.created_at DESC' : 'posts.created_at DESC';
 
-$sql = "SELECT posts.*, users.username, 
+$sql = "
+SELECT posts.*, users.username,
     IFNULL(SUM(post_votes.vote), 0) AS votes,
     (SELECT vote FROM post_votes WHERE post_id = posts.id AND user_id = ?) AS user_vote
-    FROM posts
-    LEFT JOIN users ON posts.user_id = users.id
-    LEFT JOIN post_votes ON posts.id = post_votes.post_id
-    GROUP BY posts.id
-    ORDER BY $orderBy";
-
+FROM posts
+JOIN users ON posts.user_id = users.id
+LEFT JOIN post_votes ON posts.id = post_votes.post_id
+WHERE posts.user_id = ?
+   OR posts.user_id IN (
+       SELECT following_id FROM followers WHERE follower_id = ?
+   )
+GROUP BY posts.id
+ORDER BY $orderBy
+";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param("iii", $user_id, $user_id, $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -42,7 +61,6 @@ $topics = [];
 while ($row = $topics_result->fetch_assoc()) {
     $topics[] = $row['name'];
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -76,6 +94,24 @@ while ($row = $topics_result->fetch_assoc()) {
             <button class="btn <?php echo ($sort === 'hot') ? 'active' : ''; ?>">Hot</button>
         </a>
     </div>
+
+<?php if ($result->num_rows === 0): ?>
+    <div class="post" style="text-align: center; padding: 50px 20px; color: #777;">
+        <?php if (!$hasMyPosts && !$followsOthers): ?>
+            <h2>Welcome to your feed!</h2>
+            <p>Your feed is empty. Try posting something or follow some users to get started.</p>
+        <?php elseif (!$hasMyPosts): ?>
+            <h2>Your feed is empty</h2>
+            <p>You haven't posted anything yet. Tap the post button to start sharing.</p>
+        <?php elseif (!$followsOthers): ?>
+            <h2>Your feed is quiet</h2>
+            <p>Follow some users to see their posts here.</p>
+        <?php else: ?>
+            <h2>Your feed is empty</h2>
+            <p>No posts found for your feed at this time.</p>
+        <?php endif; ?>
+    </div>
+<?php endif; ?>
 
     <?php while ($row = $result->fetch_assoc()): ?>
         <div class="post" data-post-id="<?php echo $row['id']; ?>" id="post-<?php echo $row['id']; ?>">

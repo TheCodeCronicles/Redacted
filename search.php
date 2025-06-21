@@ -13,20 +13,37 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true' && isset($_GET['query'])) {
     $results = [];
 
     if (!empty($query)) {
-        // Updated SQL for AJAX response
-        $stmt = $conn->prepare("SELECT username, profile_pic FROM users WHERE username LIKE ? LIMIT 10");
-        $likeQuery = "%" . $query . "%";
-        $stmt->bind_param("s", $likeQuery);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        if ($query[0] === '#') {
+            // Topic search
+            $searchTerm = '%' . substr($query, 1) . '%'; // remove the # symbol
+            $stmt = $conn->prepare("SELECT id, name, description FROM topics WHERE name LIKE ? LIMIT 10");
+            $stmt->bind_param("s", $searchTerm);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-    while ($row = $result->fetch_assoc()) {
-        $results[] = [
-            'username' => $row['username'],
-            'profile_pic' => $row['profile_pic'] ?: 'assets/images/default-avatar.png'
-        ];
-    }
+            while ($row = $result->fetch_assoc()) {
+                $results[] = [
+                    'type' => 'topic',
+                    'name' => $row['name'],
+                    'description' => $row['description'],
+                ];
+            }
+        } else {
+            // Username search
+            $likeQuery = "%" . $query . "%";
+            $stmt = $conn->prepare("SELECT username, profile_pic FROM users WHERE username LIKE ? LIMIT 10");
+            $stmt->bind_param("s", $likeQuery);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
+            while ($row = $result->fetch_assoc()) {
+                $results[] = [
+                    'type' => 'user',
+                    'username' => $row['username'],
+                    'profile_pic' => $row['profile_pic'] ?: 'assets/images/default-avatar.png'
+                ];
+            }
+        }
     }
 
     header('Content-Type: application/json');
@@ -120,6 +137,22 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true' && isset($_GET['query'])) {
             scroll-behavior: smooth;
         }
 
+        .tag-pill {
+    display: inline-block;
+    background-color: #333;
+    color: #fff;
+    padding: 4px 10px;
+    margin: 3px 0;
+    border-radius: 15px;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+}
+
+.tag-pill:hover {
+    background-color: #555;
+}
+
     </style>
 </head>
 <body>
@@ -127,8 +160,8 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true' && isset($_GET['query'])) {
 
     <div class="userforms">
         <form id="liveSearchForm" method="POST" action="">
-            <h1>Search Users</h1>
-            <input type="text" name="query" id="liveSearchInput" placeholder="Search for a username..." autocomplete="off" required>
+            <h1>Search Users or Topics</h1>
+            <input type="text" name="query" id="liveSearchInput" placeholder="Search for a username or #topic..." autocomplete="off" required>
         </form>
 
         <div class="search-results" id="liveResults" style="display:none;"></div>
@@ -151,20 +184,38 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'true' && isset($_GET['query'])) {
             .then(res => res.json())
             .then(data => {
                 if (data.length > 0) {
-                    resultsContainer.innerHTML = '<ul class="search-list">' + data.map(user => {
-                        const regex = new RegExp(`(${query})`, 'ig');
-                        const highlighted = user.username.replace(regex, '<mark>$1</mark>');
-                        return `
-                          <li style="display: flex; align-items: center; margin-bottom: 10px;">
-                            <a href="profile.php?user=${encodeURIComponent(user.username)}" style="display: flex; align-items: center; gap: 12px; color: #ffffff; text-decoration: none;">
-                              <img src="${user.profile_pic}" alt="${user.username}"
-                                   style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; margin-top: 0;">
-                              <span style="line-height: 1; display: flex; align-items: center;">${highlighted}</span>
-                            </a>
-                          </li>
-                        `;
+                    resultsContainer.innerHTML = '<ul class="search-list">' + data.map(item => {
+    if (item.type === 'user') {
+        const regex = new RegExp(`(${query})`, 'ig');
+        const highlighted = item.username.replace(regex, '<mark>$1</mark>');
+        return `
+            <li style="display: flex; align-items: center; margin-bottom: 10px;">
+                <a href="profile.php?user=${encodeURIComponent(item.username)}" style="display: flex; align-items: center; gap: 12px; color: #ffffff; text-decoration: none;">
+                    <img src="${item.profile_pic}" alt="${item.username}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+                    <span style="line-height: 1;">${highlighted}</span>
+                </a>
+            </li>
+        `;
+    } else if (item.type === 'topic') {
+        const queryText = query.slice(1); // exclude the #
+        let displayName;
 
-                    }).join('') + '</ul>';
+        if (queryText.length >= 1) {
+            const regex = new RegExp(`(${queryText})`, 'ig');
+            displayName = item.name.replace(regex, '<mark>$1</mark>');
+        } else {
+            displayName = item.name;
+        }
+
+        return `
+            <li style="margin-bottom: 10px;">
+                <a class="tag-pill" href="topic.php?name=${encodeURIComponent(item.name)}">
+                    #${displayName}
+                </a>
+            </li>
+        `;
+    }
+}).join('') + '</ul>';
                 } else {
                     resultsContainer.innerHTML = '<p>No users found.</p>';
                 }
