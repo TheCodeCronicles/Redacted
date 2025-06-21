@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    if (!empty($content) || $media_path !== null) {
+    if ($media_path !== null) {
         // Remove media_type from the query
         $stmt = $conn->prepare("INSERT INTO posts (user_id, content, image_path, created_at) VALUES (?, ?, ?, NOW())");
         $stmt->bind_param("iss", $user_id, $content, $media_path);
@@ -59,6 +59,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <title>Create Post - [REDACTED]</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        #media-warning {
+          transition: opacity 0.3s ease;
+        }
+
+    </style>
 </head>
 <body>
 <?php include 'navbar.php'; ?>
@@ -67,11 +73,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <h1>Create a Post</h1>
             <textarea name="content" rows="5" placeholder="What's happening?" required></textarea><br><br>
             <input type="file" name="media" accept="image/*,video/*">
+            <p id="media-warning" style="display:none; color: #ff6b6b; font-size: 14px; margin-top: 5px;">
+              Please upload an image or video to continue.
+            </p>
             <button class="btn" type="submit">Post</button>
         </form>
     </div>
     
     <?php include 'settings.php'; ?>
+    
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+  const fileInput = document.querySelector('input[name="media"]');
+  const warning = document.getElementById('media-warning');
+
+  if (!fileInput.files.length) {
+    e.preventDefault();
+    warning.style.display = 'block';
+  } else {
+    warning.style.display = 'none'; // Hide warning if fixed
+  }
+});
+</script>
+
+
 
 </body>
 </html>
