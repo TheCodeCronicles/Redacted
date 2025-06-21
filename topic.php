@@ -8,55 +8,44 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-if (!isset($_GET['user'])) {
+if (!isset($_GET['name'])) {
     header("Location: feed.php");
     exit();
 }
 
-$username = $_GET['user'];
+$topic_name = $_GET['name'];
 $user_id = $_SESSION['user_id'];
 
-// Fetch user info
-$user_stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
-$user_stmt->bind_param("s", $username);
-$user_stmt->execute();
-$user_result = $user_stmt->get_result();
+// Get topic ID from name
+$topic_stmt = $conn->prepare("SELECT id FROM topics WHERE name = ?");
+$topic_stmt->bind_param("s", $topic_name);
+$topic_stmt->execute();
+$topic_result = $topic_stmt->get_result();
 
-if ($user_result->num_rows === 0) {
-    echo "User not found.";
+if ($topic_result->num_rows === 0) {
+    echo "Topic not found.";
     exit();
 }
 
-$user_data = $user_result->fetch_assoc();
-$is_own_profile = ($_SESSION['username'] === $username);
+$topic_data = $topic_result->fetch_assoc();
+$topic_id = $topic_data['id'];
 
-// Count followers and following
-$follower_count = $conn->query("SELECT COUNT(*) FROM followers WHERE following_id = {$user_data['id']}")->fetch_row()[0];
-$following_count = $conn->query("SELECT COUNT(*) FROM followers WHERE follower_id = {$user_data['id']}")->fetch_row()[0];
 
-// Fetch user posts
-// Fetch user posts with vote info
 $sql = "SELECT posts.*, users.username,
-    IFNULL(SUM(post_votes.vote), 0) AS votes,
-    (SELECT vote FROM post_votes WHERE post_id = posts.id AND user_id = ?) AS user_vote
-    FROM posts
-    LEFT JOIN users ON posts.user_id = users.id
-    LEFT JOIN post_votes ON posts.id = post_votes.post_id
-    WHERE posts.user_id = ?
-    GROUP BY posts.id
-    ORDER BY posts.created_at DESC";
+        IFNULL(SUM(post_votes.vote), 0) AS votes,
+        (SELECT vote FROM post_votes WHERE post_id = posts.id AND user_id = ?) AS user_vote
+        FROM posts
+        JOIN users ON posts.user_id = users.id
+        LEFT JOIN post_votes ON posts.id = post_votes.post_id
+        JOIN post_topics ON posts.id = post_topics.post_id
+        WHERE post_topics.topic_id = ?
+        GROUP BY posts.id
+        ORDER BY posts.created_at DESC";
 
 $post_stmt = $conn->prepare($sql);
-$post_stmt->bind_param("ii", $user_id, $user_data['id']);
+$post_stmt->bind_param("ii", $user_id, $topic_id);
 $post_stmt->execute();
 $posts = $post_stmt->get_result();
-
-
-$is_following = false;
-if (!$is_own_profile) {
-    $check_follow = $conn->query("SELECT 1 FROM followers WHERE follower_id = {$user_id} AND following_id = {$user_data['id']}");
-    $is_following = $check_follow->num_rows > 0;
-}
 
 ?>
 
@@ -72,42 +61,10 @@ if (!$is_own_profile) {
     <?php include 'navbar.php'; ?>
     <div class="profile-container">
 
-        <div class="profile-header">
-            <img src="<?php echo htmlspecialchars($user_data['profile_pic'] ?? 'assets/images/default.png'); ?>" class="profile-pic" alt="Profile Picture">
-
-            <div class="profile-info">
-                <h2>@<?php echo htmlspecialchars($username); ?></h2>
-            
-                <div class="follow-stats">
-                    <div class="stat">
-                        <strong><?php echo $follower_count; ?></strong><span>Followers</span>
-                    </div>
-                    <div class="stat">
-                        <strong><?php echo $following_count; ?></strong><span>Following</span>
-                    </div>
-                </div>
-                <br>
-                <p><?php echo nl2br(htmlspecialchars($user_data['bio'] ?? '')); ?></p>
-            
-                <?php if (!$is_own_profile): ?>
-                    <form action="follow.php" method="post">
-                        <input type="hidden" name="follow_id" value="<?php echo $user_data['id']; ?>">
-                        <input type="hidden" name="username" value="<?php echo htmlspecialchars($username); ?>">
-                        <button class="btn follow-btn <?php echo $is_following ? 'unfollow' : 'follow'; ?>" type="submit" name="action" value="<?php echo $is_following ? 'unfollow' : 'follow'; ?>">
-                            <?php echo $is_following ? 'Following' : 'Follow'; ?>
-                        </button>
-                    </form>
-                <?php endif; ?>
-                
-                <?php if ($is_own_profile): ?>
-                    <form action="edit_profile.php" method="get">
-                        <button type="submit" class="edit-profile-btn">Edit Profile</button>
-                    </form>
-                <?php endif; ?>
-            </div>
-
-
+        <div class="topic-header">
+          <h1>#<?php echo htmlspecialchars($topic_name); ?></h1>
         </div>
+
         <?php
             $all_posts = [];
             while ($post = $posts->fetch_assoc()) {
@@ -128,13 +85,13 @@ if (!$is_own_profile) {
 
         ?>
 
-
+<!--
         <div class="tabs-buttons">
             <button class="tab-btn active" data-tab="posts">Posts</button>
             <button class="tab-btn" data-tab="reels">Redacts</button>
             <button class="tab-btn" data-tab="tagged">Tagged</button>
         </div>
-
+-->
         <div class="profile-tab-content">
             <!-- Posts tab: show everything -->
             <div class="tab-content active" id="posts">
@@ -160,7 +117,7 @@ if (!$is_own_profile) {
                         <p>No posts yet.</p>
                 <?php endif; ?>
             </div>
-                            
+             
             <!-- Redacts tab: show videos only -->
             <div class="tab-content" id="reels">
                 <div class="profile-grid">
@@ -187,24 +144,6 @@ if (!$is_own_profile) {
             <div class="tab-content" id="tagged">
                 <p>No tagged posts yet.</p>
             </div>
-        </div>
-
-        <!-- Followers Modal -->
-        <div id="followers-modal" class="follow-modal hidden">
-          <div class="follow-modal-content">
-            <h3>Followers</h3>
-            <button class="close-modal">&times;</button>
-            <ul id="followers-list" class="follow-user-list"></ul>
-          </div>
-        </div>
-
-        <!-- Following Modal -->
-        <div id="following-modal" class="follow-modal hidden">
-          <div class="follow-modal-content">
-            <h3>Following</h3>
-            <button class="close-modal">&times;</button>
-            <ul id="following-list" class="follow-user-list"></ul>
-          </div>
         </div>
 
         <!-- Post Display Modal -->

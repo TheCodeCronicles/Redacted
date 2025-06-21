@@ -1140,3 +1140,60 @@ nav a:hover {
   border: 2px solid #ddd;
   box-shadow: 0 0 6px rgba(0,0,0,0.3);
 }
+
+.tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.tag-pill {
+  background-color: #333;
+  color: #eee;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+}
+
+.tag-pill .remove-tag {
+  margin-left: 8px;
+  cursor: pointer;
+  color: red;
+  font-weight: bold;
+}
+
+.post-tags .tag-pill {
+  display: inline-block;
+  background-color: #222;
+  color: #eee;
+  padding: 4px 10px;
+  margin: 3px 5px 0 0;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.tag-row {
+    margin-top: 6px;
+}
+.post-tag {
+    display: inline-block;
+    background-color: #222;
+    color: #fff;
+    border-radius: 12px;
+    padding: 2px 8px;
+    margin: 2px 4px 0 0;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.topic-header h1 {
+  text-align: center;
+  font-size: 3em;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+

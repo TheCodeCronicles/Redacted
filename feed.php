@@ -28,6 +28,21 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
+
+$topic_stmt = $conn->prepare("
+    SELECT t.name FROM topics t
+    JOIN post_topics pt ON pt.topic_id = t.id
+    WHERE pt.post_id = ?
+");
+$topic_stmt->bind_param("i", $post['id']);
+$topic_stmt->execute();
+$topics_result = $topic_stmt->get_result();
+$topics = [];
+
+while ($row = $topics_result->fetch_assoc()) {
+    $topics[] = $row['name'];
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -64,11 +79,31 @@ $result = $stmt->get_result();
 
     <?php while ($row = $result->fetch_assoc()): ?>
         <div class="post" data-post-id="<?php echo $row['id']; ?>" id="post-<?php echo $row['id']; ?>">
+            <?php $topic_stmt = $conn->prepare("
+                SELECT t.name FROM topics t
+                JOIN post_topics pt ON pt.topic_id = t.id
+                WHERE pt.post_id = ?
+            ");
+
+            $topic_stmt->bind_param("i", $row['id']);
+            $topic_stmt->execute();
+            $topics_result = $topic_stmt->get_result();
+            $topics = [];
+
+            while ($rowtopic = $topics_result->fetch_assoc()) {
+                $topics[] = $rowtopic['name'];
+            }?>
+
             <div class="post-frame">
             <a href="profile.php?user=<?php echo urlencode($row['username']); ?>">
                 <h3>@<?php echo htmlspecialchars($row['username']); ?></h3>
             </a>
             <p><?php echo nl2br(htmlspecialchars($row['content'])); ?></p>
+            <div class="post-tags">
+                <?php foreach ($topics as $tag): ?>
+                    <a class="tag-pill" href="topic.php?name=<?= urlencode($tag) ?>">#<?= htmlspecialchars($tag) ?></a>
+                <?php endforeach; ?>
+            </div>
             <div class="post-media">
                 <?php if (!empty($row['image_path'])): ?>
                 <?php

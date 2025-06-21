@@ -62,6 +62,26 @@ $result = $stmt->get_result();
                 </a>
                 <p><?php echo nl2br(htmlspecialchars($row['content'])); ?></p>
 
+                <?php $topic_stmt = $conn->prepare("
+                    SELECT t.name FROM topics t
+                    JOIN post_topics pt ON pt.topic_id = t.id
+                    WHERE pt.post_id = ?
+                ");
+                    
+                $topic_stmt->bind_param("i", $row['id']);
+                $topic_stmt->execute();
+                $topics_result = $topic_stmt->get_result();
+                $topics = [];
+                    
+                while ($rowtopic = $topics_result->fetch_assoc()) {
+                    $topics[] = $rowtopic['name'];
+                }?>
+
+                <div class="tag-row">
+                    <?php foreach ($topics as $tag): ?>
+                        <a class="post-tag" href="topic.php?name=<?= urlencode($tag) ?>">#<?= htmlspecialchars($tag) ?></a>
+                    <?php endforeach; ?>
+                </div><br>
                 <small><?php echo $row['created_at']; ?></small>
             </div>
 
