@@ -24,9 +24,12 @@ $myFollows->execute();
 $myFollowsResult = $myFollows->get_result()->fetch_assoc();
 $followsOthers = $myFollowsResult['count'] > 0;
 
-// Fetch latest posts with user vote
-$sort = $_GET['sort'] ?? 'new';
-$orderBy = ($sort === 'hot') ? 'votes DESC, posts.created_at DESC' : 'posts.created_at DESC';
+$sort = $_GET['sort'] ?? 'new';  // Add this to capture sort parameter
+
+$orderBy = match($sort) {
+    'hot' => 'votes DESC, posts.created_at DESC',
+    default => 'posts.created_at DESC'
+};
 
 $sql = "
 SELECT posts.*, users.username, users.profile_pic,
@@ -35,16 +38,26 @@ SELECT posts.*, users.username, users.profile_pic,
 FROM posts
 JOIN users ON posts.user_id = users.id
 LEFT JOIN post_votes ON posts.id = post_votes.post_id
-WHERE posts.user_id = ?
-   OR posts.user_id IN (
-       SELECT following_id FROM followers WHERE follower_id = ?
-   )
-GROUP BY posts.id
-ORDER BY $orderBy
 ";
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("iii", $user_id, $user_id, $user_id);
+// Apply feed filter if not explore
+if ($sort !== 'explore') {
+    $sql .= "WHERE posts.user_id = ? OR posts.user_id IN (
+        SELECT following_id FROM followers WHERE follower_id = ?
+    ) ";
+}
+
+$sql .= "GROUP BY posts.id ORDER BY $orderBy";
+
+// Prepare and bind
+if ($sort !== 'explore') {
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iii", $user_id, $user_id, $user_id);
+} else {
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $user_id);
+}
+
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -87,13 +100,16 @@ while ($row = $topics_result->fetch_assoc()) {
     <div class="container">
     <section>
     <div style="margin-top: 40px; margin-bottom: 20px;">
-        <a href="?sort=new">
-            <button class="btn <?php echo ($sort === 'new') ? 'active' : ''; ?>">New</button>
-        </a>
-        <a href="?sort=hot">
-            <button class="btn <?php echo ($sort === 'hot') ? 'active' : ''; ?>">Hot</button>
-        </a>
-    </div>
+    <a href="?sort=new">
+        <button class="btn <?= ($sort === 'new') ? 'active' : '' ?>">New</button>
+    </a>
+    <a href="?sort=hot">
+        <button class="btn <?= ($sort === 'hot') ? 'active' : '' ?>">Hot</button>
+    </a>
+    <a href="?sort=explore">
+        <button class="btn <?= ($sort === 'explore') ? 'active' : '' ?>">Explore</button>
+    </a>
+</div>
 
     <?php if ($result->num_rows === 0): ?>
         <div class="post" style="text-align: center; padding: 50px 20px; color: #777;">
