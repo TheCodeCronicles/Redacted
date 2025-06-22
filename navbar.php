@@ -122,7 +122,7 @@ $loggedInUsername = isset($_SESSION['username']) ? $_SESSION['username'] : null;
         [REDACTS]
     </a>
 
-    <?php if ($username): ?>
+    <?php if ($loggedInUsername): ?>
         <a href="profile.php?user=<?= urlencode($loggedInUsername) ?>" 
             class="<?= ($currentPage == 'profile.php' && isset($_GET['user']) && $_GET['user'] === $loggedInUsername) ? 'active' : '' ?>">
             <img src="assets/images/default.png" alt="Profile Icon">
